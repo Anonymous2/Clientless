@@ -20,6 +20,7 @@
 #ifndef ObjectGuid_h__
 #define ObjectGuid_h__
 
+#include "Common.h"
 #include <cstdint>
 #include <functional>
 #include <cassert>
