@@ -213,7 +213,7 @@ void WorldSocket::DecompressPacket(std::shared_ptr<WorldPacket> packet)
     inflateStream_.avail_out = size;
     inflateStream_.next_out = &decompressedBytes[0];
 
-    if (inflate(&inflateStream_, Z_NO_FLUSH) == Z_OK)
+    if (inflate(&inflateStream_, Z_NO_FLUSH) != Z_OK)
         assert(false);
 
     assert(inflateStream_.avail_in == 0);
