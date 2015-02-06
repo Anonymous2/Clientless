@@ -16,9 +16,11 @@
  */
 
 #include "EventMgr.h"
+#include "Common.h"
+#include <algorithm>
 using namespace std::chrono;
 
-Event::Event(EventId id) : id_(id)
+Event::Event(EventId id) : id_(id), enabled_(false), period_(0), remaining_(0)
 {
 
 }
@@ -39,8 +41,16 @@ void Event::SetCallback(EventCallback callback)
     callback_ = callback;
 }
 
+void Event::SetEnabled(bool enabled)
+{
+    enabled_ = enabled;
+}
+
 void Event::Update(uint32 diff)
 {
+    if (!enabled_)
+        return;
+
     if (remaining_ <= 0)
     {
         callback_();
@@ -65,35 +75,65 @@ EventMgr::~EventMgr()
 
 void EventMgr::AddEvent(std::shared_ptr<Event> event)
 {
+    std::lock_guard<std::recursive_mutex> lock(eventMutex_);
     events_.push_back(event);
 }
 
 void EventMgr::RemoveEvent(EventId id)
 {
+    std::lock_guard<std::recursive_mutex> lock(eventMutex_);
     events_.remove_if([id](std::shared_ptr<Event> const& event) {
         return event->GetId() == id;
     });
 }
 
+std::shared_ptr<Event> EventMgr::GetEvent(EventId id)
+{
+    std::lock_guard<std::recursive_mutex> lock(eventMutex_);
+    auto itr = std::find_if(events_.begin(), events_.end(), [id](const std::shared_ptr<Event> event) {
+        return event->GetId() == id;
+    });
+
+    if (itr == events_.end())
+        return nullptr;
+
+    return *itr;
+}
+
 void EventMgr::Start()
 {
+    assert(!isRunning_);
+
+    isRunning_ = true;
     thread_ = std::thread(&EventMgr::ProcessEvents, this);
+}
+
+void EventMgr::Stop()
+{
+    isRunning_ = false;
+
+    if (thread_.joinable())
+        thread_.join();
 }
 
 void EventMgr::ProcessEvents()
 {
-    isRunning_ = true;
     uint32 diff = 0;
 
     while (isRunning_)
     {
         system_clock::time_point start = high_resolution_clock::now();
 
-        for (auto event : events_)
+        std::lock_guard<std::recursive_mutex> lock(eventMutex_);
+
+        for (std::shared_ptr<Event> event : events_)
             event->Update(diff);
 
         std::this_thread::sleep_for(milliseconds(5));
         system_clock::time_point end = high_resolution_clock::now();
         diff = uint32(duration_cast<milliseconds>(end - start).count());
     }
+
+    std::lock_guard<std::recursive_mutex> lock(eventMutex_);
+    events_.clear();
 }

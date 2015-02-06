@@ -60,6 +60,11 @@ void PacketRC4::Initialize(const BigNumber* key)
     ready_ = true;
 }
 
+void PacketRC4::Reset()
+{
+    ready_ = false;
+}
+
 void PacketRC4::DecryptReceived(uint8* data, int32 len)
 {
     if (!ready_)

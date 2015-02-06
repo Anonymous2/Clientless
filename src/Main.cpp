@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     WorldSession world(session);
     world.Enter();
 
-    while (world.IsConnected())
+    while (world.GetSocket()->IsConnected())
     {
         std::string cmd;
         std::getline(std::cin, cmd);

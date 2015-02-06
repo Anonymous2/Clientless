@@ -22,6 +22,7 @@
 #include <functional>
 #include <thread>
 #include <memory>
+#include <mutex>
 
 enum EventId
 {
@@ -40,14 +41,15 @@ class Event
         EventId GetId();
 
         void SetPeriod(uint32 period);
+        void SetEnabled(bool enabled);
         void SetCallback(EventCallback callback);
 
         void Update(uint32 diff);
     private:
         EventId id_;
+        bool enabled_;
         uint32 period_;
         int32 remaining_;
-        bool repeat_;
         EventCallback callback_;
 };
 
@@ -59,12 +61,15 @@ class EventMgr
 
         void AddEvent(std::shared_ptr<Event> event);
         void RemoveEvent(EventId id);
+        std::shared_ptr<Event> GetEvent(EventId id);
 
         void Start();
+        void Stop();
 
     private:
         std::thread thread_;
         bool isRunning_;
+        std::recursive_mutex eventMutex_;
         std::list<std::shared_ptr<Event>> events_;
 
         void ProcessEvents();

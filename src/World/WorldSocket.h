@@ -46,14 +46,13 @@ class WorldSocket : public TCPSocket
         void DecompressPacket(std::shared_ptr<WorldPacket> packet);
     private:
         WorldSession* session_;
-        bool isRunning_;
 
         std::thread senderThread_;
-        std::mutex sendMutex_;
+        std::recursive_mutex sendMutex_;
         std::queue<std::shared_ptr<WorldPacket>> sendQueue_;
 
         std::thread receiverThread_;
-        std::mutex receiveMutex_;
+        std::recursive_mutex receiveMutex_;
         std::queue<std::shared_ptr<WorldPacket>> receiveQueue_;
 
         PacketRC4 packetCrypt_;

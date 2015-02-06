@@ -33,18 +33,13 @@ struct WorldOpcodeHandler;
 class WorldSession
 {
     friend class WorldSocket;
-    friend class Warden;
 
     public:
         WorldSession(std::shared_ptr<Session> session);
         ~WorldSession();
 
         void Enter();
-
         void HandleConsoleCommand(std::string cmd);
-        void SendPacket(WorldPacket &packet);
-
-        bool IsConnected();
 
         WorldSocket* GetSocket();
     private:
@@ -61,6 +56,7 @@ class WorldSession
 
         WorldOpcodeHandler* GetOpcodeHandlers() const;
         void HandlePacket(std::shared_ptr<WorldPacket> recvPacket);
+        void SendPacket(WorldPacket &packet);
 
     // AuthHandler.cpp
     private:

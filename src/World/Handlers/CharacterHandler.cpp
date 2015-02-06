@@ -71,22 +71,11 @@ void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
         packet.WriteByteSeq(player_.Guid[4]);
         SendPacket(packet);
 
-        std::shared_ptr<Event> keepAliveEvent(new Event(EVENT_SEND_KEEP_ALIVE));
-        keepAliveEvent->SetPeriod(MINUTE * IN_MILLISECONDS);
-        keepAliveEvent->SetCallback([this]() {
-            WorldPacket packet(CMSG_KEEP_ALIVE, 0);
-            SendPacket(packet);
-        });
+        if (std::shared_ptr<Event> pingEvent = eventMgr_.GetEvent(EVENT_SEND_PING))
+            pingEvent->SetEnabled(true);
 
-        eventMgr_.AddEvent(keepAliveEvent);
-
-        std::shared_ptr<Event> pingEvent(new Event(EVENT_SEND_PING));
-        pingEvent->SetPeriod((MINUTE / 2) * IN_MILLISECONDS);
-        pingEvent->SetCallback([this]() {
-            SendPing();
-        });
-
-        eventMgr_.AddEvent(pingEvent);
+        if (std::shared_ptr<Event> keepAliveEvent = eventMgr_.GetEvent(EVENT_SEND_KEEP_ALIVE))
+            keepAliveEvent->SetEnabled(true);
     }
     else
     {

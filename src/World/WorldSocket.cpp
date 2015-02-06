@@ -22,17 +22,25 @@
     #include <netinet/in.h>
 #endif
 
-WorldSocket::WorldSocket(WorldSession* session) : session_(session), isRunning_(false)
+WorldSocket::WorldSocket(WorldSession* session) : session_(session)
 {
-    inflateStream_.zalloc = Z_NULL;
-    inflateStream_.zfree = Z_NULL;
-    inflateStream_.opaque = Z_NULL;
-    inflateInit(&inflateStream_);
 }
 
 WorldSocket::~WorldSocket()
 {
-    Disconnect();
+    if (IsConnected())
+        Disconnect();
+
+    if (senderThread_.joinable())
+        senderThread_.join();
+
+    if (receiverThread_.joinable())
+        receiverThread_.join();
+}
+
+bool WorldSocket::Connect(std::string address)
+{
+    assert(!IsConnected());
 
     if (senderThread_.joinable())
         senderThread_.join();
@@ -40,15 +48,16 @@ WorldSocket::~WorldSocket()
     if (receiverThread_.joinable())
         receiverThread_.join();
 
-    inflateEnd(&inflateStream_);
-}
-
-bool WorldSocket::Connect(std::string address)
-{
     if (!TCPSocket::Connect(address))
         return false;
 
-    isRunning_ = true;
+    packetCrypt_.Reset();
+
+    inflateStream_.zalloc = Z_NULL;
+    inflateStream_.zfree = Z_NULL;
+    inflateStream_.opaque = Z_NULL;
+    inflateInit(&inflateStream_);
+
     senderThread_ = std::thread(&WorldSocket::RunSenderThread, this);
     receiverThread_ = std::thread(&WorldSocket::RunReceiverThread, this);
     return true;
@@ -56,26 +65,26 @@ bool WorldSocket::Connect(std::string address)
 
 void WorldSocket::Disconnect()
 {
-    isRunning_ = false;
-
-    std::lock_guard<std::mutex> sendLock(sendMutex_);
+    TCPSocket::Disconnect();
+   
+    std::lock_guard<std::recursive_mutex> sendLock(sendMutex_);
 
     while (!sendQueue_.empty())
         sendQueue_.pop();
 
-    std::lock_guard<std::mutex> receiveLock(receiveMutex_);
+    std::lock_guard<std::recursive_mutex> receiveLock(receiveMutex_);
 
     while (!receiveQueue_.empty())
         receiveQueue_.pop();
 
-    TCPSocket::Disconnect();
+    inflateEnd(&inflateStream_);
 }
 
 void WorldSocket::EnqueuePacket(WorldPacket &packet)
 {
     std::shared_ptr<WorldPacket> copy(new WorldPacket(packet));
 
-    std::lock_guard<std::mutex> lock(sendMutex_);
+    std::lock_guard<std::recursive_mutex> lock(sendMutex_);
     sendQueue_.push(copy);
 }
 
@@ -84,7 +93,7 @@ std::shared_ptr<WorldPacket> WorldSocket::GetNextPacket()
     if (receiveQueue_.empty())
         return nullptr;
 
-    std::lock_guard<std::mutex> lock(receiveMutex_);
+    std::lock_guard<std::recursive_mutex> lock(receiveMutex_);
     std::shared_ptr<WorldPacket> packet = receiveQueue_.front();
     receiveQueue_.pop();
 
@@ -93,12 +102,12 @@ std::shared_ptr<WorldPacket> WorldSocket::GetNextPacket()
 
 void WorldSocket::RunSenderThread()
 {
-    while (isRunning_)
+    while (IsConnected())
     {
         if (!sendQueue_.empty())
         {
             // Acquire next packet
-            std::lock_guard<std::mutex> lock(sendMutex_);
+            std::lock_guard<std::recursive_mutex> lock(sendMutex_);
             std::shared_ptr<WorldPacket> packet = sendQueue_.front();
             sendQueue_.pop();
 
@@ -132,7 +141,7 @@ void WorldSocket::RunReceiverThread()
     uint32 size;
     Opcodes opcode;
 
-    while (isRunning_)
+    while (IsConnected())
     {
         // Read normal header (4 bytes)
         Read((char*)&header[0], 4);
@@ -180,12 +189,11 @@ void WorldSocket::RunReceiverThread()
         if (packet->GetOpcode() & COMPRESSED_OPCODE_MASK)
             DecompressPacket(packet);
 
-        std::lock_guard<std::mutex> lock(receiveMutex_);
+        std::lock_guard<std::recursive_mutex> lock(receiveMutex_);
         receiveQueue_.push(packet);
     }
 
     print("%s", "Disconnected from the server.");
-    isRunning_ = false;
 }
 
 void WorldSocket::DecompressPacket(std::shared_ptr<WorldPacket> packet)

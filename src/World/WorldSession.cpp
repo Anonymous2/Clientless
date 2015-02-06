@@ -19,6 +19,7 @@
 #include <functional>
 #include <limits>
 #include <iostream>
+#include <future>
 #include "EventMgr.h"
 
 struct WorldOpcodeHandler
@@ -27,17 +28,14 @@ struct WorldOpcodeHandler
     void (WorldSession::*handler)(WorldPacket &recvPacket);
 };
 
-WorldSession::WorldSession(std::shared_ptr<Session> session) :
-    session_(session), 
-    socket_(this),
-    serverSeed_(0), 
-    ping_(0)
+WorldSession::WorldSession(std::shared_ptr<Session> session) : session_(session), socket_(this), serverSeed_(0), ping_(0), lastPingTime_(0)
 {
     clientSeed_ = static_cast<uint32>(time(nullptr));
 }
 
 WorldSession::~WorldSession()
 {
+
 }
 
 WorldOpcodeHandler* WorldSession::GetOpcodeHandlers() const
@@ -95,33 +93,52 @@ void WorldSession::SendPacket(WorldPacket &packet)
 
 void WorldSession::Enter()
 {
-    socket_.Connect(session_->GetRealm().Address);
+    if (!socket_.Connect(session_->GetRealm().Address))
+        return;
     
-    std::shared_ptr<Event> packetProcessEvent(new Event(EVENT_PROCESS_INCOMING));
-    packetProcessEvent->SetPeriod(10);
-    packetProcessEvent->SetCallback([this]() {
-        std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket();
+    eventMgr_.Stop();
+    {
+        std::shared_ptr<Event> packetProcessEvent(new Event(EVENT_PROCESS_INCOMING));
+        packetProcessEvent->SetPeriod(10);
+        packetProcessEvent->SetEnabled(true);
+        packetProcessEvent->SetCallback([this]() {
+            std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket();
 
-        if (packet)
-            HandlePacket(packet);
-    });
+            if (packet)
+                HandlePacket(packet);
+        });
 
-    eventMgr_.AddEvent(packetProcessEvent);
+        eventMgr_.AddEvent(packetProcessEvent);
+
+        std::shared_ptr<Event> keepAliveEvent(new Event(EVENT_SEND_KEEP_ALIVE));
+        keepAliveEvent->SetPeriod(MINUTE * IN_MILLISECONDS);
+        keepAliveEvent->SetEnabled(false);
+        keepAliveEvent->SetCallback([this]() {
+            WorldPacket packet(CMSG_KEEP_ALIVE, 0);
+            SendPacket(packet);
+        });
+
+        eventMgr_.AddEvent(keepAliveEvent);
+
+        std::shared_ptr<Event> pingEvent(new Event(EVENT_SEND_PING));
+        pingEvent->SetPeriod((MINUTE / 2) * IN_MILLISECONDS);
+        pingEvent->SetEnabled(false);
+        pingEvent->SetCallback([this]() {
+            SendPing();
+        });
+
+        eventMgr_.AddEvent(pingEvent);
+    }
     eventMgr_.Start();
 }
 
-bool WorldSession::IsConnected()
+void WorldSession::HandleConsoleCommand(std::string cmd)
 {
-    return socket_.IsConnected();
+    if (cmd == "quit" || cmd == "disconnect" || cmd == "logout")
+        socket_.Disconnect();
 }
 
 WorldSocket* WorldSession::GetSocket()
 {
     return &socket_;
-}
-
-void WorldSession::HandleConsoleCommand(std::string cmd)
-{
-    if (cmd == "quit")
-        socket_.Disconnect();
 }
