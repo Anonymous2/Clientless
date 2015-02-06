@@ -32,7 +32,7 @@ WorldSocket::WorldSocket(WorldSession* session) : session_(session), isRunning_(
 
 WorldSocket::~WorldSocket()
 {
-    isRunning_ = false;
+    Disconnect();
 
     if (senderThread_.joinable())
         senderThread_.join();
@@ -45,20 +45,29 @@ WorldSocket::~WorldSocket()
 
 bool WorldSocket::ConnectToWorldServer(std::string address)
 {
-    if (Connect(address))
-    {
-        isRunning_ = true;
-        senderThread_ = std::thread(&WorldSocket::RunSenderThread, this);
-        receiverThread_ = std::thread(&WorldSocket::RunReceiverThread, this);
-        return true;
-    }
+    if (!Connect(address))
+        return false;
 
-    return false;
+    isRunning_ = true;
+    senderThread_ = std::thread(&WorldSocket::RunSenderThread, this);
+    receiverThread_ = std::thread(&WorldSocket::RunReceiverThread, this);
+    return true;
 }
 
 void WorldSocket::Disconnect()
 {
     isRunning_ = false;
+
+    std::lock_guard<std::mutex> sendLock(sendMutex_);
+
+    while (!sendQueue_.empty())
+        sendQueue_.pop();
+
+    std::lock_guard<std::mutex> receiveLock(receiveMutex_);
+
+    while (!receiveQueue_.empty())
+        receiveQueue_.pop();
+
     TCPSocket::Disconnect();
 }
 
