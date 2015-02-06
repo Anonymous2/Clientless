@@ -26,7 +26,11 @@ void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
     uint32 count = recvPacket.ReadBits(17);
 
     if (!count)
+    {
+        error("%s", "You don't have any characters on this realm. Please create one first!");
+        socket_.Disconnect();
         return;
+    }
 
     CharacterList characterlist;
     characterlist.Populate(count, recvPacket);
@@ -87,5 +91,6 @@ void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
     else
     {
         error("There is no character named '%s' on this account! Please choose another one!", session_->GetCharacterName().c_str());
+        socket_.Disconnect();
     }
 }

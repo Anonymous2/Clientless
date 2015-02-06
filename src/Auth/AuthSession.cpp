@@ -231,9 +231,12 @@ bool AuthSession::HandleRealmlistResponse()
     if (Realm const* realm = realmlist.GetRealmByName(session_->GetRealmName()))
     {
         if (realm->Flags & REALM_FLAG_OFFLINE)
+        {
             error("%s", "The selected realm is offline!");
-        else
-            session_->SetRealm(*realm);
+            return false;
+        }
+
+        session_->SetRealm(*realm);
     }
     else
     {
