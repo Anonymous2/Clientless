@@ -114,7 +114,8 @@ void WorldSession::HandleAuthChallenge(WorldPacket &recvPacket)
     ByteBuffer addonDataCompressed;
     addonDataCompressed.resize(compressedSize);
 
-    assert(compress(addonDataCompressed.contents(), &compressedSize, addonData.contents(), addonData.size()) == Z_OK);
+    if (compress(addonDataCompressed.contents(), &compressedSize, addonData.contents(), addonData.size()) != Z_OK)
+        assert(false);
 
     response << uint32(4 + compressedSize);
     response << uint32(addonData.size());
