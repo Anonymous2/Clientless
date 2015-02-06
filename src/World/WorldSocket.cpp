@@ -43,9 +43,9 @@ WorldSocket::~WorldSocket()
     inflateEnd(&inflateStream_);
 }
 
-bool WorldSocket::ConnectToWorldServer(std::string address)
+bool WorldSocket::Connect(std::string address)
 {
-    if (!Connect(address))
+    if (!TCPSocket::Connect(address))
         return false;
 
     isRunning_ = true;

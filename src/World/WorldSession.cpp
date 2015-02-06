@@ -95,7 +95,7 @@ void WorldSession::SendPacket(WorldPacket &packet)
 
 void WorldSession::Enter()
 {
-    socket_.ConnectToWorldServer(session_->GetRealm().Address);
+    socket_.Connect(session_->GetRealm().Address);
     
     std::shared_ptr<Event> packetProcessEvent(new Event(EVENT_PROCESS_INCOMING));
     packetProcessEvent->SetPeriod(10);

@@ -34,7 +34,7 @@ class WorldSocket : public TCPSocket
         WorldSocket(WorldSession* session);
         ~WorldSocket();
 
-        bool ConnectToWorldServer(std::string address);
+        bool Connect(std::string address) override;
         void Disconnect() override;
 
         void EnqueuePacket(WorldPacket &packet);

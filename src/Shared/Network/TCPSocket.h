@@ -32,7 +32,7 @@ class TCPSocket
         TCPSocket();
         ~TCPSocket();
 
-        bool Connect(std::string address);
+        virtual bool Connect(std::string address);
         virtual void Disconnect();
         bool IsConnected();
 
