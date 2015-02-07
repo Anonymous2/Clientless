@@ -191,7 +191,7 @@ void WorldSession::HandleAuthenticationResponse(WorldPacket &recvPacket)
         return;
     }
 
-    if (!hasAccountInfo || result != AUTH_OK)
+    if (!hasAccountInfo)
         return;
 
     print("%s", "[World]");
