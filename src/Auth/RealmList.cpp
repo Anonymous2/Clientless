@@ -28,7 +28,6 @@ void RealmList::Populate(uint32 count, ByteBuffer &buffer)
         Realm realm;
 
         buffer >> realm.Icon;
-        buffer >> realm.Lock;
         realm.Flags = buffer.read<RealmFlags>();
         buffer >> realm.Name;
         buffer >> realm.Address;
@@ -37,16 +36,10 @@ void RealmList::Populate(uint32 count, ByteBuffer &buffer)
         buffer >> realm.Timezone;
         buffer >> realm.ID;
 
-        if (realm.Flags & REALM_FLAG_SPECIFYBUILD)
-        {
-            buffer >> realm.MajorVersion;
-            buffer >> realm.MinorVersion;
-            buffer >> realm.BugfixVersion;
-            buffer >> realm.Build;
-        }
-
         list_[i] = realm;
     }
+
+    buffer.read_skip<uint16_t>();
 }
 
 void RealmList::Print()

@@ -21,8 +21,8 @@
 #include "Common.h"
 
 static const std::string GameName = "WoW";
-static const uint8  GameVersion[3] = { 4, 3, 4 };       // Expansion, Major, Minor
-static const uint16 GameBuild = 15595;
+static const uint8  GameVersion[3] = { 1, 12, 1 };      // Expansion, Major, Minor
+static const uint16 GameBuild = 5875;
 static const std::string Platform = "x86";              // x86 | x64 | PPC
 static const std::string OS = "OSX";                    // Win | OSX
 static const uint8 Locale[4] = { 'e', 'n', 'U', 'S' };  // enUS | enGB | frFR | deDE | koKR | zhCN | zhTW | ruRU | esES | esMX | ptBR

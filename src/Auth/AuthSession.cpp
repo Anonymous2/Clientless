@@ -161,9 +161,7 @@ struct LogonProofResponse_Header
 struct LogonProofResponse_Body
 {
     uint8   M2[20];
-    uint32  Unk1;
-    uint32  Unk2;
-    uint16  Unk3;
+    uint32  Unk;
 };
  
 #pragma pack(pop)
@@ -205,7 +203,7 @@ struct RealmlistResponse_Header
     AuthCmd Opcode;
     uint16 Length;
     uint32 Unk;
-    uint16 Count;
+    uint8 Count;
 };
 
 #pragma pack(pop)
