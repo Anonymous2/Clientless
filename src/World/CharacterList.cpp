@@ -17,7 +17,7 @@
 
 #include "CharacterList.h"
 
-void CharacterList::Populate(uint8 count, WorldPacket &recvPacket)
+void CharacterList::Populate(uint32 count, WorldPacket &recvPacket)
 {
     list_.clear();
     list_.resize(count);
