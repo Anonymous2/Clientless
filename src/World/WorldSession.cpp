@@ -43,7 +43,6 @@ const std::vector<WorldOpcodeHandler> WorldSession::GetOpcodeHandlers()
 {
     return {
         // AuthHandler.cpp
-        BIND_OPCODE_HANDLER(MSG_VERIFY_CONNECTIVITY, HandleConnectionVerification),
         BIND_OPCODE_HANDLER(SMSG_AUTH_CHALLENGE, HandleAuthenticationChallenge),
         BIND_OPCODE_HANDLER(SMSG_AUTH_RESPONSE, HandleAuthenticationResponse),
 

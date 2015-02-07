@@ -60,7 +60,6 @@ class WorldSession
 
     // AuthHandler.cpp
     private:
-        void HandleConnectionVerification(WorldPacket &recvPacket);
         void HandleAuthenticationChallenge(WorldPacket &recvPacket);
         void HandleAuthenticationResponse(WorldPacket &recvPacket);
 
