@@ -53,11 +53,6 @@ bool WorldSocket::Connect(std::string address)
 
     packetCrypt_.Reset();
 
-    inflateStream_.zalloc = Z_NULL;
-    inflateStream_.zfree = Z_NULL;
-    inflateStream_.opaque = Z_NULL;
-    inflateInit(&inflateStream_);
-
     senderThread_ = std::thread(&WorldSocket::RunSenderThread, this);
     receiverThread_ = std::thread(&WorldSocket::RunReceiverThread, this);
     return true;
@@ -76,8 +71,6 @@ void WorldSocket::Disconnect()
 
     while (!receiveQueue_.empty())
         receiveQueue_.pop();
-
-    inflateEnd(&inflateStream_);
 }
 
 void WorldSocket::EnqueuePacket(WorldPacket &packet)
@@ -186,38 +179,9 @@ void WorldSocket::RunReceiverThread()
         if (!IsConnected())
             break;
 
-        if (packet->GetOpcode() & COMPRESSED_OPCODE_MASK)
-            DecompressPacket(packet);
-
         std::lock_guard<std::recursive_mutex> lock(receiveMutex_);
         receiveQueue_.push(packet);
     }
 
     print("%s", "Disconnected from the server.");
-}
-
-void WorldSocket::DecompressPacket(std::shared_ptr<WorldPacket> packet)
-{
-    // Calculate real header
-    Opcodes opcode = static_cast<Opcodes>(packet->GetOpcode() ^ COMPRESSED_OPCODE_MASK);
-
-    uint32 size;
-    (*packet) >> size;
-
-    // Decompress packet
-    std::vector<uint8> decompressedBytes;
-    decompressedBytes.resize(size);
-
-    inflateStream_.avail_in = packet->size() - packet->rpos();
-    inflateStream_.next_in = const_cast<uint8*>(packet->contents() + packet->rpos());
-    inflateStream_.avail_out = size;
-    inflateStream_.next_out = &decompressedBytes[0];
-
-    if (inflate(&inflateStream_, Z_NO_FLUSH) != Z_OK)
-        assert(false);
-
-    assert(inflateStream_.avail_in == 0);
-
-    packet->Initialize(opcode, size);
-    packet->append(&decompressedBytes[0], size);
 }

@@ -25,7 +25,7 @@
 class WorldPacket : public ByteBuffer
 {
     public:
-        WorldPacket() : ByteBuffer(0), opcode_(NULL_OPCODE)
+        WorldPacket() : ByteBuffer(0), opcode_(MSG_NULL_ACTION)
         {
         }
  

@@ -21,7 +21,7 @@
 
 #include "Define.h"
 
-enum Opcodes : uint16_t
+enum Opcodes : uint16
 {
     MSG_NULL_ACTION                                 = 0x000,
     CMSG_BOOTME                                     = 0x001,
