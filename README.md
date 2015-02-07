@@ -29,7 +29,7 @@ Custom packet handlers can be added easily.
 + Then you have to associate the desired opcode with your handler function in *WorldSession.cpp*
 
 ```
-    { SMSG_CHAR_ENUM, &WorldSession::HandleCharacterEnum };
+    BIND_OPCODE_HANDLER(SMSG_CHAR_ENUM, HandleCharacterEnum)
 ```
 
 + Finally, you need to define your handler somewhere. You may create your own .cpp files or use *MiscHandler.cpp* in World/Handlers directory.

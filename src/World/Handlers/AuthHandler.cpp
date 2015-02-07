@@ -39,7 +39,7 @@ void WorldSession::HandleConnectionVerification(WorldPacket &recvPacket)
     SendPacket(response);
 }
 
-void WorldSession::HandleAuthChallenge(WorldPacket &recvPacket)
+void WorldSession::HandleAuthenticationChallenge(WorldPacket &recvPacket)
 {
     // Read server values
     uint32 keys[8];
@@ -156,7 +156,7 @@ enum AuthResult : uint8
     AUTH_LOCKED_ENFORCED        = 34,
 };
 
-void WorldSession::HandleAuthResponse(WorldPacket &recvPacket)
+void WorldSession::HandleAuthenticationResponse(WorldPacket &recvPacket)
 {
     uint32 billingTimeRemaining, billingTimeRested, queuePosition;
     uint8 billingPlanFlags, result, expansion;
@@ -197,9 +197,4 @@ void WorldSession::HandleAuthResponse(WorldPacket &recvPacket)
 
     packet.Initialize(CMSG_CHAR_ENUM, 0);
     SendPacket(packet);
-}
-
-void WorldSession::HandleRedirect(WorldPacket &recvPacket)
-{
-    assert(false);
 }

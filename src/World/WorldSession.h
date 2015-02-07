@@ -54,16 +54,15 @@ class WorldSession
         uint64 lastPingTime_;
         uint32 ping_;
 
-        WorldOpcodeHandler* GetOpcodeHandlers() const;
+        const std::vector<WorldOpcodeHandler> GetOpcodeHandlers();
         void HandlePacket(std::shared_ptr<WorldPacket> recvPacket);
         void SendPacket(WorldPacket &packet);
 
     // AuthHandler.cpp
     private:
         void HandleConnectionVerification(WorldPacket &recvPacket);
-        void HandleAuthChallenge(WorldPacket &recvPacket);
-        void HandleAuthResponse(WorldPacket &recvPacket);
-        void HandleRedirect(WorldPacket &recvPacket);
+        void HandleAuthenticationChallenge(WorldPacket &recvPacket);
+        void HandleAuthenticationResponse(WorldPacket &recvPacket);
 
     // CharacterHandler.cpp
     private:

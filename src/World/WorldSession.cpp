@@ -25,7 +25,7 @@
 struct WorldOpcodeHandler
 {
     Opcodes opcode;
-    void (WorldSession::*handler)(WorldPacket &recvPacket);
+    std::function<void(WorldPacket&)> callback;
 };
 
 WorldSession::WorldSession(std::shared_ptr<Session> session) : session_(session), socket_(this), serverSeed_(0), ping_(0), lastPingTime_(0)
@@ -35,54 +35,48 @@ WorldSession::WorldSession(std::shared_ptr<Session> session) : session_(session)
 
 WorldSession::~WorldSession()
 {
-
 }
 
-WorldOpcodeHandler* WorldSession::GetOpcodeHandlers() const
+#define BIND_OPCODE_HANDLER(a, b) { a, std::bind(&WorldSession::b, this, std::placeholders::_1) }
+
+const std::vector<WorldOpcodeHandler> WorldSession::GetOpcodeHandlers()
 {
-    static WorldOpcodeHandler table[] =
-    {
+    return {
         // AuthHandler.cpp
-        { MSG_VERIFY_CONNECTIVITY, &WorldSession::HandleConnectionVerification },
-        { SMSG_AUTH_CHALLENGE, &WorldSession::HandleAuthChallenge },
-        { SMSG_AUTH_RESPONSE, &WorldSession::HandleAuthResponse },
-        { SMSG_REDIRECT_CLIENT, &WorldSession::HandleRedirect },
+        BIND_OPCODE_HANDLER(MSG_VERIFY_CONNECTIVITY, HandleConnectionVerification),
+        BIND_OPCODE_HANDLER(SMSG_AUTH_CHALLENGE, HandleAuthenticationChallenge),
+        BIND_OPCODE_HANDLER(SMSG_AUTH_RESPONSE, HandleAuthenticationResponse),
 
         // CharacterHandler.cpp
-        { SMSG_CHAR_ENUM, &WorldSession::HandleCharacterEnum },
+        BIND_OPCODE_HANDLER(SMSG_CHAR_ENUM, HandleCharacterEnum),
 
         // MiscHandler.cpp
-        { SMSG_MOTD, &WorldSession::HandleMOTD },
-        { SMSG_PONG, &WorldSession::HandlePong },
-        { SMSG_TIME_SYNC_REQ, &WorldSession::HandleTimeSyncRequest },
-
-        { NULL_OPCODE, nullptr }
+        BIND_OPCODE_HANDLER(SMSG_MOTD, HandleMOTD),
+        BIND_OPCODE_HANDLER(SMSG_PONG, HandlePong),
+        BIND_OPCODE_HANDLER(SMSG_TIME_SYNC_REQ, HandleTimeSyncRequest)
     };
- 
-    return table;
 }
 
 void WorldSession::HandlePacket(std::shared_ptr<WorldPacket> recvPacket)
 {
-    static WorldOpcodeHandler* table = GetOpcodeHandlers();
- 
-    for (uint16 i = 0; table[i].handler != nullptr; i++)
-    {
-        if (table[i].opcode == recvPacket->GetOpcode())
-        {
-            try
-            {
-                (this->*table[i].handler)(*recvPacket);
-            }
-            catch (ByteBufferException const& exception)
-            {
-                error("%s", "ByteBufferException occured while handling a world packet!");
-                error("Opcode: 0x%04x", recvPacket->GetOpcode());
-                error("%s", exception.what());
-            }
+    static const std::vector<WorldOpcodeHandler> handlers = GetOpcodeHandlers();
 
-            break;
-        }
+    auto itr = std::find_if(handlers.begin(), handlers.end(), [recvPacket](const WorldOpcodeHandler& handler) {
+        return recvPacket->GetOpcode() == handler.opcode;
+    });
+
+    if (itr == handlers.end())
+        return;
+
+    try
+    {
+        itr->callback(*recvPacket);
+    }
+    catch (ByteBufferException const& exception)
+    {
+        error("%s", "ByteBufferException occured while handling a world packet!");
+        error("Opcode: 0x%04x", recvPacket->GetOpcode());
+        error("%s", exception.what());
     }
 }
 
@@ -102,9 +96,7 @@ void WorldSession::Enter()
         packetProcessEvent->SetPeriod(10);
         packetProcessEvent->SetEnabled(true);
         packetProcessEvent->SetCallback([this]() {
-            std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket();
-
-            if (packet)
+            while (std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket())
                 std::async(&WorldSession::HandlePacket, this, packet);
         });
 
