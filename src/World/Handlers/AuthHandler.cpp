@@ -179,13 +179,19 @@ void WorldSession::HandleAuthenticationResponse(WorldPacket &recvPacket)
 
     recvPacket >> result;
 
-    if (hasQueueInfo && result == AUTH_OK)
+    if (hasQueueInfo)
     {
         recvPacket >> queuePosition;
-        print("%s is full. Position in queue: %d", session_->GetRealmName().c_str(), queuePosition);
+
+        if (queuePosition > 0)
+            print("%s is full. Position in queue: %d", session_->GetRealmName().c_str(), queuePosition);
+        else
+            print("%s is full.", session_->GetRealmName().c_str());
+
+        return;
     }
 
-    if (!hasAccountInfo)
+    if (!hasAccountInfo || result != AUTH_OK)
         return;
 
     print("%s", "[World]");
