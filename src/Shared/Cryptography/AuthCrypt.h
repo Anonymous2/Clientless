@@ -28,6 +28,7 @@
 
 #include "Define.h"
 #include <vector>
+#include <cstdlib>
 
 class BigNumber;
 
