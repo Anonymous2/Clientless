@@ -19,7 +19,7 @@
 
 #include "Define.h"
 #include "Network/TCPSocket.h"
-#include "Cryptography/PacketRC4.h"
+#include "Cryptography/AuthCrypt.h"
 #include "WorldPacket.h"
 #include <zlib/zlib.h>
 #include <queue>
@@ -43,7 +43,6 @@ class WorldSocket : public TCPSocket
         void RunSenderThread();
         void RunReceiverThread();
 
-        void DecompressPacket(std::shared_ptr<WorldPacket> packet);
     private:
         WorldSession* session_;
 
@@ -55,6 +54,5 @@ class WorldSocket : public TCPSocket
         std::recursive_mutex receiveMutex_;
         std::queue<std::shared_ptr<WorldPacket>> receiveQueue_;
 
-        PacketRC4 packetCrypt_;
-        z_stream_s inflateStream_;
+        AuthCrypt packetCrypt_;
 };

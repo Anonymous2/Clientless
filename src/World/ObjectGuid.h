@@ -89,7 +89,7 @@ class ObjectGuid
         static ObjectGuid const Empty;
 
         ObjectGuid() { _data._guid = 0; }
-        explicit ObjectGuid(uint64_t guid)  { _data._guid = guid; }
+        ObjectGuid(uint64_t guid)  { _data._guid = guid; }
         ObjectGuid(HighGuid hi, uint32_t entry, uint32_t counter) { _data._guid = counter ? uint64_t(counter) | (uint64_t(entry) << 32) | (uint64_t(hi) << ((hi == HIGHGUID_CORPSE || hi == HIGHGUID_AREATRIGGER) ? 48 : 52)) : 0; }
         ObjectGuid(HighGuid hi, uint32_t counter) { _data._guid = counter ? uint64_t(counter) | (uint64_t(hi) << ((hi == HIGHGUID_CORPSE || hi == HIGHGUID_AREATRIGGER) ? 48 : 52)) : 0; }
 

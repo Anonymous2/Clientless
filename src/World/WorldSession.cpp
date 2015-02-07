@@ -43,17 +43,11 @@ const std::vector<WorldOpcodeHandler> WorldSession::GetOpcodeHandlers()
 {
     return {
         // AuthHandler.cpp
-        BIND_OPCODE_HANDLER(MSG_VERIFY_CONNECTIVITY, HandleConnectionVerification),
         BIND_OPCODE_HANDLER(SMSG_AUTH_CHALLENGE, HandleAuthenticationChallenge),
         BIND_OPCODE_HANDLER(SMSG_AUTH_RESPONSE, HandleAuthenticationResponse),
 
         // CharacterHandler.cpp
-        BIND_OPCODE_HANDLER(SMSG_CHAR_ENUM, HandleCharacterEnum),
-
-        // MiscHandler.cpp
-        BIND_OPCODE_HANDLER(SMSG_MOTD, HandleMOTD),
-        BIND_OPCODE_HANDLER(SMSG_PONG, HandlePong),
-        BIND_OPCODE_HANDLER(SMSG_TIME_SYNC_REQ, HandleTimeSyncRequest)
+        BIND_OPCODE_HANDLER(SMSG_CHAR_ENUM, HandleCharacterEnum)
     };
 }
 
@@ -101,25 +95,6 @@ void WorldSession::Enter()
         });
 
         eventMgr_.AddEvent(packetProcessEvent);
-
-        std::shared_ptr<Event> keepAliveEvent(new Event(EVENT_SEND_KEEP_ALIVE));
-        keepAliveEvent->SetPeriod(MINUTE * IN_MILLISECONDS);
-        keepAliveEvent->SetEnabled(false);
-        keepAliveEvent->SetCallback([this]() {
-            WorldPacket packet(CMSG_KEEP_ALIVE, 0);
-            SendPacket(packet);
-        });
-
-        eventMgr_.AddEvent(keepAliveEvent);
-
-        std::shared_ptr<Event> pingEvent(new Event(EVENT_SEND_PING));
-        pingEvent->SetPeriod((MINUTE / 2) * IN_MILLISECONDS);
-        pingEvent->SetEnabled(false);
-        pingEvent->SetCallback([this]() {
-            SendPing();
-        });
-
-        eventMgr_.AddEvent(pingEvent);
     }
     eventMgr_.Start();
 }

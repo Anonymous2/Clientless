@@ -60,18 +60,10 @@ class WorldSession
 
     // AuthHandler.cpp
     private:
-        void HandleConnectionVerification(WorldPacket &recvPacket);
         void HandleAuthenticationChallenge(WorldPacket &recvPacket);
         void HandleAuthenticationResponse(WorldPacket &recvPacket);
 
     // CharacterHandler.cpp
     private:
         void HandleCharacterEnum(WorldPacket &recvPacket);
-
-    // MiscHandler.cpp
-    private:
-        void HandleMOTD(WorldPacket &recvPacket);
-        void HandlePong(WorldPacket &recvPacket);
-        void SendPing();
-        void HandleTimeSyncRequest(WorldPacket &recvPacket);
 };

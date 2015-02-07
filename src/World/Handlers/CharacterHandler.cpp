@@ -20,10 +20,8 @@
 
 void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
 {
-    recvPacket.ReadBits(23);
-    recvPacket.ReadBit();
-
-    uint32 count = recvPacket.ReadBits(17);
+    uint8 count;
+    recvPacket >> count;
 
     if (!count)
     {
@@ -41,41 +39,9 @@ void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
         // Copy character structure 
         player_ = Player(*character);
 
-        WorldPacket packet(CMSG_LOAD_SCREEN, 5);
-        packet << uint32(player_.MapId);
-        packet.WriteBit(0x80);  // unk, from [4.3.4 15595 enUS]
-        packet.FlushBits();
+        WorldPacket packet(CMSG_PLAYER_LOGIN, 8);
+        packet << player_.Guid;
         SendPacket(packet);
-
-        packet.Initialize(CMSG_VIOLENCE_LEVEL, 1);
-        packet << uint8(0x02);  // violenceLevel, from [4.3.4 15595 enUS]
-        SendPacket(packet);
-
-        packet.Initialize(CMSG_PLAYER_LOGIN, 8);
-        packet.WriteBit(player_.Guid[2]);
-        packet.WriteBit(player_.Guid[3]);
-        packet.WriteBit(player_.Guid[0]);
-        packet.WriteBit(player_.Guid[6]);
-        packet.WriteBit(player_.Guid[4]);
-        packet.WriteBit(player_.Guid[5]);
-        packet.WriteBit(player_.Guid[1]);
-        packet.WriteBit(player_.Guid[7]);
-
-        packet.WriteByteSeq(player_.Guid[2]);
-        packet.WriteByteSeq(player_.Guid[7]);
-        packet.WriteByteSeq(player_.Guid[0]);
-        packet.WriteByteSeq(player_.Guid[3]);
-        packet.WriteByteSeq(player_.Guid[5]);
-        packet.WriteByteSeq(player_.Guid[6]);
-        packet.WriteByteSeq(player_.Guid[1]);
-        packet.WriteByteSeq(player_.Guid[4]);
-        SendPacket(packet);
-
-        if (std::shared_ptr<Event> pingEvent = eventMgr_.GetEvent(EVENT_SEND_PING))
-            pingEvent->SetEnabled(true);
-
-        if (std::shared_ptr<Event> keepAliveEvent = eventMgr_.GetEvent(EVENT_SEND_KEEP_ALIVE))
-            keepAliveEvent->SetEnabled(true);
     }
     else
     {

@@ -53,11 +53,6 @@ bool WorldSocket::Connect(std::string address)
 
     packetCrypt_.Reset();
 
-    inflateStream_.zalloc = Z_NULL;
-    inflateStream_.zfree = Z_NULL;
-    inflateStream_.opaque = Z_NULL;
-    inflateInit(&inflateStream_);
-
     senderThread_ = std::thread(&WorldSocket::RunSenderThread, this);
     receiverThread_ = std::thread(&WorldSocket::RunReceiverThread, this);
     return true;
@@ -76,8 +71,6 @@ void WorldSocket::Disconnect()
 
     while (!receiveQueue_.empty())
         receiveQueue_.pop();
-
-    inflateEnd(&inflateStream_);
 }
 
 void WorldSocket::EnqueuePacket(WorldPacket &packet)
@@ -111,16 +104,14 @@ void WorldSocket::RunSenderThread()
             std::shared_ptr<WorldPacket> packet = sendQueue_.front();
             sendQueue_.pop();
 
-            ByteBuffer prepared;
-
             uint16 size = htons(packet->size() + 4);
             uint32 opcode = uint32(packet->GetOpcode());
 
-            packetCrypt_.EncryptSend((uint8*)&size, 2);
-            packetCrypt_.EncryptSend((uint8*)&opcode, 4);
-
+            ByteBuffer prepared;
             prepared << size;
             prepared << opcode;
+
+            packetCrypt_.EncryptSend(&prepared[0], prepared.size());
 
             if (!packet->empty())
                 prepared.append(packet->contents(), packet->size());
@@ -128,7 +119,10 @@ void WorldSocket::RunSenderThread()
             Send(prepared.contents(), prepared.size());
 
             if (packet->GetOpcode() == CMSG_AUTH_SESSION)
-                packetCrypt_.Initialize(&session_->session_->GetKey());
+            {
+                packetCrypt_.SetKey(session_->session_->GetKey().AsByteArray().get(), session_->session_->GetKey().GetNumBytes());
+                packetCrypt_.Init();
+            }   
         }
         else
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -137,8 +131,8 @@ void WorldSocket::RunSenderThread()
 
 void WorldSocket::RunReceiverThread()
 {
-    uint8 header[5];
-    uint32 size;
+    uint8 header[4];
+    uint16 size;
     Opcodes opcode;
 
     while (IsConnected())
@@ -149,30 +143,13 @@ void WorldSocket::RunReceiverThread()
         if (!IsConnected())
             break;
 
-        packetCrypt_.DecryptReceived(&header[0], 4);
-
-        // Read additional header byte if necessary (1 byte)
-        if (header[0] & 0x80)
-        {
-            Read((char*)&header[4], 1);
-
-            if (!IsConnected())
-                break;
-
-            packetCrypt_.DecryptReceived(&header[4], 1);
-        }
+        packetCrypt_.DecryptRecv(&header[0], 4);
 
         // Calculate size and opcode
-        if (header[0] & 0x80)
-        {
-            size = ((header[0] & 0x7F) << 16) | (header[1] << 8) | header[2];
-            opcode = static_cast<Opcodes>(header[3] | (header[4] << 8));
-        }
-        else
-        {
-            size = (header[0] << 8) | header[1];
-            opcode = static_cast<Opcodes>(header[2] | (header[3] << 8));
-        }
+        size = (header[0] << 8) | header[1];
+        opcode = static_cast<Opcodes>(header[2] | (header[3] << 8));
+
+        print("Received 0x%04X", opcode);
 
         size -= sizeof(Opcodes);
 
@@ -186,38 +163,9 @@ void WorldSocket::RunReceiverThread()
         if (!IsConnected())
             break;
 
-        if (packet->GetOpcode() & COMPRESSED_OPCODE_MASK)
-            DecompressPacket(packet);
-
         std::lock_guard<std::recursive_mutex> lock(receiveMutex_);
         receiveQueue_.push(packet);
     }
 
     print("%s", "Disconnected from the server.");
-}
-
-void WorldSocket::DecompressPacket(std::shared_ptr<WorldPacket> packet)
-{
-    // Calculate real header
-    Opcodes opcode = static_cast<Opcodes>(packet->GetOpcode() ^ COMPRESSED_OPCODE_MASK);
-
-    uint32 size;
-    (*packet) >> size;
-
-    // Decompress packet
-    std::vector<uint8> decompressedBytes;
-    decompressedBytes.resize(size);
-
-    inflateStream_.avail_in = packet->size() - packet->rpos();
-    inflateStream_.next_in = const_cast<uint8*>(packet->contents() + packet->rpos());
-    inflateStream_.avail_out = size;
-    inflateStream_.next_out = &decompressedBytes[0];
-
-    if (inflate(&inflateStream_, Z_NO_FLUSH) != Z_OK)
-        assert(false);
-
-    assert(inflateStream_.avail_in == 0);
-
-    packet->Initialize(opcode, size);
-    packet->append(&decompressedBytes[0], size);
 }

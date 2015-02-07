@@ -43,7 +43,6 @@ struct CharacterItems
 {
     uint32 DisplayId;
     uint8 InventoryType;
-    uint32 EnchantAuraId;
 };
 
 struct CharacterBags
@@ -65,7 +64,7 @@ struct Character
     uint32 AreaId;
     uint32 MapId;
     Position4D Position;
-    ObjectGuid GuildGuid;
+    uint32 GuildId;
     uint32 Flags;
     uint32 CustomizationFlags;
     uint8 Slot;

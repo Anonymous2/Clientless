@@ -22,6 +22,7 @@
 #include "Define.h"
 #include "Common.h"
 #include "ByteConverter.h"
+#include "World/ObjectGuid.h"
 
 #include <exception>
 #include <list>
@@ -363,6 +364,12 @@ class ByteBuffer
                     break;
                 value += c;
             }
+            return *this;
+        }
+
+        ByteBuffer &operator>>(ObjectGuid& value)
+        {
+            value = read<uint64_t>();
             return *this;
         }
 
