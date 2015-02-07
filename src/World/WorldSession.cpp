@@ -105,7 +105,7 @@ void WorldSession::Enter()
             std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket();
 
             if (packet)
-                HandlePacket(packet);
+                std::async(&WorldSession::HandlePacket, this, packet);
         });
 
         eventMgr_.AddEvent(packetProcessEvent);
