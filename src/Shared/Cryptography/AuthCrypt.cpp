@@ -25,6 +25,7 @@
 
 #include "AuthCrypt.h"
 #include "HMACSHA1.h"
+#include <cstring>
 
 AuthCrypt::AuthCrypt()
 {
