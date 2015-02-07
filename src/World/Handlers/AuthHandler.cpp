@@ -21,80 +21,41 @@
 #include "Addon.h"
 #include <zlib/zlib.h>
 
-void WorldSession::HandleConnectionVerification(WorldPacket &recvPacket)
-{
-    std::string serverString;
-    recvPacket >> serverString;
-
-    if (serverString != "RLD OF WARCRAFT CONNECTION - SERVER TO CLIENT")
-    {
-        print("Connection verification failed. Invalid string received: %s", serverString.c_str());
-        return;
-    }
-
-    std::string clientString = "D OF WARCRAFT CONNECTION - CLIENT TO SERVER";
-
-    WorldPacket response(MSG_VERIFY_CONNECTIVITY, clientString.length() + 1);
-    response << clientString;
-    SendPacket(response);
-}
-
 void WorldSession::HandleAuthenticationChallenge(WorldPacket &recvPacket)
 {
-    // Read server values
-    uint32 keys[8];
+    uint32 unk;
+    uint32 serverSeed;
 
-    for (int i = 0; i < 8; i++)
-        recvPacket >> keys[i];
-
-    recvPacket >> serverSeed_;
-
-    uint8 unk;
     recvPacket >> unk;
+    recvPacket >> serverSeed;
 
-    // Generate our proof
+    uint8 encryptionSeed[2][16];
+
+    recvPacket.read(encryptionSeed[0], 16);
+    recvPacket.read(encryptionSeed[1], 16);
+
     uint32 zero = 0;
+    uint32 clientSeed = 0x4B8C87D0;
 
-    SHA1 proof;
-    proof.Update(session_->GetAccountName());
-    proof.Update((uint8*)&zero, sizeof(uint32));
-    proof.Update((uint8*)&clientSeed_, sizeof(uint32));
-    proof.Update((uint8*)&serverSeed_, sizeof(uint32));
-    proof.Update(session_->GetKey());
-    proof.Finalize();
+    SHA1 authResponse;
+    authResponse.Update(session_->GetAccountName());
+    authResponse.Update((uint8*)&zero, sizeof(uint32));
+    authResponse.Update((uint8*)&clientSeed, sizeof(uint32));
+    authResponse.Update((uint8*)&serverSeed, sizeof(uint32));
+    authResponse.Update(session_->GetKey());
+    authResponse.Finalize();
 
-    uint8* digest = proof.GetDigest();
- 
     WorldPacket response(CMSG_AUTH_SESSION);
-    response << uint32(0); // 00 00 00 00 [4.3.4 15595 enUS]
-    response << uint32(0); // 00 00 00 00 [4.3.4 15595 enUS]
-    response << uint8(0); // 00 [4.3.4 15595 enUS]
-    response << digest[10];
-    response << digest[18];
-    response << digest[12];
-    response << digest[5];
-    response << uint64(3); // 03 00 00 00 00 00 00 00 [4.3.4 15595 enUS]
-    response << digest[15];
-    response << digest[9];
-    response << digest[19];
-    response << digest[4];
-    response << digest[7];
-    response << digest[16];
-    response << digest[3];
-    response << uint16(GameBuild);
-    response << digest[8];
-    response << uint32(1); // 01 00 00 00  [4.3.4 15595 enUS]
-    response << uint8(1);
-    response << digest[17];
-    response << digest[6];
-    response << digest[0];
-    response << digest[1];
-    response << digest[11];
-    response << uint32(clientSeed_);
-    response << digest[2];
-    response << uint32(0); // 00 00 00 00 [4.3.4 15595 enUS]
-    response << digest[14];
-    response << digest[13];
+    response << uint32(GameBuild);
+    response << uint32(0);
+    response << session_->GetAccountName();
+    response << uint32(0);
+    response << clientSeed;
+    response << uint32(0);
+    response << uint32(0);
+    response << uint32(session_->GetRealm().ID);
+    response << uint64(0);
+    response.append(authResponse.GetDigest(), 20);
 
     ByteBuffer addonData;
     addonData << uint32(AddonDatabase.size());
@@ -120,11 +81,6 @@ void WorldSession::HandleAuthenticationChallenge(WorldPacket &recvPacket)
     response << uint32(4 + compressedSize);
     response << uint32(addonData.size());
     response.append(addonDataCompressed.contents(), compressedSize);
-
-    response.WriteBit(0);
-    response.WriteBits(session_->GetAccountName().length(), 12);
-    response.FlushBits();
-    response.WriteString(session_->GetAccountName());
 
     SendPacket(response);
 }
@@ -158,43 +114,30 @@ enum AuthResult : uint8
 
 void WorldSession::HandleAuthenticationResponse(WorldPacket &recvPacket)
 {
-    uint32 billingTimeRemaining, billingTimeRested, queuePosition;
-    uint8 billingPlanFlags, result, expansion;
-    bool hasQueueInfo, hasAccountInfo;
-
-    hasQueueInfo = recvPacket.ReadBit();
-
-    if (hasQueueInfo)
-        recvPacket.ReadBit();
-
-    hasAccountInfo = recvPacket.ReadBit();
-
-    if (hasAccountInfo)
-    {
-        recvPacket >> billingTimeRemaining;
-        recvPacket >> billingPlanFlags;
-        recvPacket >> billingTimeRested;
-        recvPacket >> expansion;
-    }
+    uint8 result, billingFlags, expansion;
+    uint32 billingTimeRemaining, billingTimeRested;
 
     recvPacket >> result;
 
-    if (hasQueueInfo && result == AUTH_OK)
+    if (result == AUTH_WAIT_QUEUE)
     {
+        uint32 queuePosition;
         recvPacket >> queuePosition;
-        print("%s is full. Position in queue: %d", session_->GetRealmName().c_str(), queuePosition);
+
+        if (queuePosition > 0)
+            print("%s is full. Position in queue: %d", session_->GetRealmName().c_str(), queuePosition);
+
+        return;
     }
 
-    if (!hasAccountInfo)
-        return;
+    recvPacket >> billingTimeRemaining;
+    recvPacket >> billingFlags;
+    recvPacket >> billingTimeRested;
+    recvPacket >> expansion;
 
     print("%s", "[World]");
     print("%s", "Successfully authenticated!");
 
-    WorldPacket packet(CMSG_REALM_SPLIT, 4);
-    packet << uint32(0xFFFFFFFF);
-    SendPacket(packet);
-
-    packet.Initialize(CMSG_CHAR_ENUM, 0);
+    WorldPacket packet(CMSG_CHAR_ENUM, 0);
     SendPacket(packet);
 }

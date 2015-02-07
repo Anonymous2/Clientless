@@ -26,82 +26,45 @@ void CharacterList::Populate(uint8 count, WorldPacket &recvPacket)
     {
         Character character;
 
-        character.Guid[3] = recvPacket.ReadBit();
-        character.GuildGuid[1] = recvPacket.ReadBit();
-        character.GuildGuid[7] = recvPacket.ReadBit();
-        character.GuildGuid[2] = recvPacket.ReadBit();
-        character.Name.resize(recvPacket.ReadBits(7));
-        character.Guid[4] = recvPacket.ReadBit();
-        character.Guid[7] = recvPacket.ReadBit();
-        character.GuildGuid[3] = recvPacket.ReadBit();
-        character.Guid[5] = recvPacket.ReadBit();
-        character.GuildGuid[6] = recvPacket.ReadBit();
-        character.Guid[1] = recvPacket.ReadBit();
-        character.GuildGuid[5] = recvPacket.ReadBit();
-        character.GuildGuid[4] = recvPacket.ReadBit();
-        character.IsFirstLogin = recvPacket.ReadBit();
-        character.Guid[0] = recvPacket.ReadBit();
-        character.Guid[2] = recvPacket.ReadBit();
-        character.Guid[6] = recvPacket.ReadBit();
-        character.GuildGuid[0] = recvPacket.ReadBit();
-
-        list_[i] = character;
-    }
-
-    for (uint8 i = 0; i < count; i++)
-    {
-        recvPacket.read((uint8*)&list_[i].Class, 1);
+        recvPacket >> character.Guid;
+        recvPacket >> character.Name;
+        recvPacket.read((uint8*)&character.Race, 1);
+        recvPacket.read((uint8*)&character.Class, 1);
+        recvPacket.read((uint8*)&character.Gender, 1);
+        recvPacket >> character.Display.Skin;
+        recvPacket >> character.Display.Face;
+        recvPacket >> character.Display.HairStyle;
+        recvPacket >> character.Display.HairColor;
+        recvPacket >> character.Display.FacialHair;
+        recvPacket >> character.Level;
+        recvPacket >> character.AreaId;
+        recvPacket >> character.MapId;
+        recvPacket >> character.Position.X;
+        recvPacket >> character.Position.Y;
+        recvPacket >> character.Position.Z;
+        recvPacket >> character.GuildId;
+        recvPacket >> character.Flags;
+        recvPacket >> character.CustomizationFlags;
+        recvPacket >> character.IsFirstLogin;
+        recvPacket >> character.Pet.DisplayId;
+        recvPacket >> character.Pet.Level;
+        recvPacket >> character.Pet.Family;
 
         for (uint8 j = 0; j < 19; j++)
         {
-            recvPacket >> list_[i].Items[j].InventoryType;
-            recvPacket >> list_[i].Items[j].DisplayId;
-            recvPacket >> list_[i].Items[j].EnchantAuraId;
+            recvPacket >> character.Items[j].DisplayId;
+            recvPacket >> character.Items[j].InventoryType;
+            recvPacket >> character.Items[j].EnchantAuraId;
         }
 
         for (uint8 j = 0; j < 4; j++)
         {
-            recvPacket >> list_[i].Bags[j].DisplayId;
-            recvPacket >> list_[i].Bags[j].EnchantId;
-            recvPacket >> list_[i].Bags[j].InventoryType;
+            recvPacket >> character.Bags[j].DisplayId;
+            recvPacket >> character.Bags[j].InventoryType;
+            recvPacket >> character.Bags[j].EnchantId;
         }
 
-        recvPacket >> list_[i].Pet.Family;
-        recvPacket.ReadByteSeq(list_[i].GuildGuid[2]);
-        recvPacket >> list_[i].Slot;
-        recvPacket >> list_[i].Display.HairStyle;
-        recvPacket.ReadByteSeq(list_[i].GuildGuid[3]);
-        recvPacket >> list_[i].Pet.DisplayId;
-        recvPacket >> list_[i].Flags;
-        recvPacket >> list_[i].Display.HairColor;
-        recvPacket.ReadByteSeq(list_[i].Guid[4]);
-        recvPacket >> list_[i].MapId;
-        recvPacket.ReadByteSeq(list_[i].GuildGuid[5]);
-        recvPacket >> list_[i].Position.Z;
-        recvPacket.ReadByteSeq(list_[i].GuildGuid[6]);
-        recvPacket >> list_[i].Pet.Level;
-        recvPacket.ReadByteSeq(list_[i].Guid[3]);
-        recvPacket >> list_[i].Position.Y;
-        recvPacket >> list_[i].CustomizationFlags;
-        recvPacket >> list_[i].Display.FacialHair;
-        recvPacket.ReadByteSeq(list_[i].Guid[7]);
-        recvPacket.read((uint8*)&list_[i].Gender, 1);
-        list_[i].Name = recvPacket.ReadString(list_[i].Name.size());
-        recvPacket >> list_[i].Display.Face;
-        recvPacket.ReadByteSeq(list_[i].Guid[0]);
-        recvPacket.ReadByteSeq(list_[i].Guid[2]);
-        recvPacket.ReadByteSeq(list_[i].GuildGuid[1]);
-        recvPacket.ReadByteSeq(list_[i].GuildGuid[7]);
-        recvPacket >> list_[i].Position.X;
-        recvPacket >> list_[i].Display.Skin;
-        recvPacket.read((uint8*)&list_[i].Race, 1);
-        recvPacket >> list_[i].Level;
-        recvPacket.ReadByteSeq(list_[i].Guid[6]);
-        recvPacket.ReadByteSeq(list_[i].GuildGuid[4]);
-        recvPacket.ReadByteSeq(list_[i].GuildGuid[0]);
-        recvPacket.ReadByteSeq(list_[i].Guid[5]);
-        recvPacket.ReadByteSeq(list_[i].Guid[1]);
-        recvPacket >> list_[i].AreaId;
+        list_[i] = character;
     }
 }
 

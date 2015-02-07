@@ -65,7 +65,7 @@ struct Character
     uint32 AreaId;
     uint32 MapId;
     Position4D Position;
-    ObjectGuid GuildGuid;
+    uint32 GuildId;
     uint32 Flags;
     uint32 CustomizationFlags;
     uint8 Slot;
