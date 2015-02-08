@@ -55,7 +55,6 @@ class SRP6
         BigNumber I; // g hash ^ N hash
         BigNumber x; // Client credentials
         BigNumber u; // Scrambling
-        BigNumber v; // Verifier
         BigNumber S; // Key
         BigNumber K; // Key based on S
         BigNumber M1; // M1

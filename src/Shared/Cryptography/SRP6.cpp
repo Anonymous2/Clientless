@@ -40,7 +40,6 @@ void SRP6::Reset()
     I.SetZero();
     x.SetZero();
     u.SetZero();
-    v.SetZero();
     S.SetZero();
     K.SetZero();
     M1.SetZero();
@@ -137,13 +136,9 @@ void SRP6::Calculate()
         return;
     }
 
-    // v
-
-    v = g.ModExp(x, N);
-
     // S
 
-    S = ((B + k * (N - g.ModExp(x, N))) % N).ModExp(a + (u * x), N);
+    S = (B - k * g.ModExp(x, N)).ModExp((a + u * x), N);
 
     if (S.IsZero() || S.IsNegative())
     {
@@ -217,7 +212,6 @@ void SRP6::Calculate()
     print("%s", "I: %s", I.AsHexString().c_str());
     print("%s", "x: %s", x.AsHexString().c_str());
     print("%s", "u: %s", u.AsHexString().c_str());
-    print("%s", "v: %s", v.AsHexString().c_str());
     print("%s", "S: %s", S.AsHexString().c_str());
     print("%s", "K: %s", K.AsHexString().c_str());
     print("%s", "M1: %s", M1.AsHexString().c_str());

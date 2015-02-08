@@ -20,6 +20,7 @@
 #include "Config.h"
 #include "RealmList.h"
 #include <algorithm>
+#include <iostream>
 
 AuthSession::AuthSession(std::shared_ptr<Session> session) : session_(session)
 {
@@ -99,6 +100,27 @@ struct LogonChallengeResponse_Body
     uint8 SecurityFlags;
 };
 
+struct LogonChallengeResponse_PIN
+{
+    uint32 Unk1;
+    uint64 Unk2;
+    uint64 Unk3;
+};
+
+struct LogonChallengeResponse_Matrix
+{
+    uint8 Unk1;
+    uint8 Unk2;
+    uint8 Unk3;
+    uint8 Unk4;
+    uint64 Unk5;
+};
+
+struct LogonChallengeResponse_Token
+{
+    bool RequestToken;
+};
+
 #pragma pack(pop)
 
 bool AuthSession::HandleLogonChallengeResponse()
@@ -116,8 +138,30 @@ bool AuthSession::HandleLogonChallengeResponse()
     LogonChallengeResponse_Body body;
     socket_.Read((char*)&body, sizeof(LogonChallengeResponse_Body));
 
-    // TODO: Implement
-    assert(body.SecurityFlags == 0);
+    if (body.SecurityFlags & 0x01)
+    {
+        LogonChallengeResponse_PIN security;
+        socket_.Read((char*)&security, sizeof(LogonChallengeResponse_PIN));
+    }
+
+    if (body.SecurityFlags & 0x02)
+    {
+        LogonChallengeResponse_Matrix security;
+        socket_.Read((char*)&security, sizeof(LogonChallengeResponse_Matrix));
+    }
+
+    if (body.SecurityFlags & 0x04)
+    {
+        LogonChallengeResponse_Token security;
+        socket_.Read((char*)&security, sizeof(LogonChallengeResponse_Token));
+
+        if (security.RequestToken)
+        {
+            print("%s", "[Authenticator]");
+            std::cout << "Please enter your token: ";
+            std::getline(std::cin, token_);
+        }
+    }
 
     srp6_.Reset();
     srp6_.SetCredentials(session_->GetAccountName(), session_->GetAccountPassword());
@@ -140,11 +184,22 @@ bool AuthSession::SendLogonProof()
 
     ByteBuffer packet;
     packet << uint8(AUTH_LOGON_PROOF);
-    packet.append(srp6_.GetClientEphemeralA()->AsByteArray(32).get(), srp6_.GetClientEphemeralA()->GetNumBytes());
-    packet.append(srp6_.GetClientM1()->AsByteArray(20).get(), srp6_.GetClientM1()->GetNumBytes());
-    packet.append(crc.AsByteArray(20).get(), crc.GetNumBytes());
-    packet << uint8(0);
-    packet << uint8(0);
+    packet.append(srp6_.GetClientEphemeralA()->AsByteArray(32).get(), 32);
+    packet.append(srp6_.GetClientM1()->AsByteArray(20).get(), 20);
+    packet.append(crc.AsByteArray(20).get(), 20);
+
+    if (token_.empty())
+    {
+        packet << uint8(0);
+        packet << uint8(0);
+    }
+    else
+    {
+        packet << uint8(1);
+        packet << uint8(0x04);
+        packet << uint8(token_.size() + 1);
+        packet << token_;
+    }
 
     SendPacket(packet);
     return HandleLogonProofResponse();
@@ -157,13 +212,19 @@ struct LogonProofResponse_Header
     AuthCmd Opcode;
     AuthResult Result;
 };
+
+struct LogonProofResponse_Error
+{
+    uint8 Unk1;
+    uint8 Unk2;
+};
  
 struct LogonProofResponse_Body
 {
     uint8   M2[20];
-    uint32  Unk1;
-    uint32  Unk2;
-    uint16  Unk3;
+    uint32  AccountFlags;
+    uint32  SurveyId;
+    uint16  Unk;
 };
  
 #pragma pack(pop)
@@ -177,6 +238,8 @@ bool AuthSession::HandleLogonProofResponse()
     {
         print("%s", "[Authentication failed!]");
         print("%s", AuthResultToStr(header.Result).c_str());
+        LogonProofResponse_Error error;
+        socket_.Read((char*)&error, sizeof(LogonProofResponse_Error));
         return false;
     }
 

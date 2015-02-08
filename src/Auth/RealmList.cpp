@@ -47,6 +47,9 @@ void RealmList::Populate(uint32 count, ByteBuffer &buffer)
 
         list_[i] = realm;
     }
+
+    buffer.read_skip<uint8>();
+    buffer.read_skip<uint8>();
 }
 
 void RealmList::Print()

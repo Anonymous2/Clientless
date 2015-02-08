@@ -44,6 +44,7 @@ class AuthSession
         std::shared_ptr<Session> session_;
         TCPSocket socket_;
         SRP6 srp6_;
+        std::string token_;
 
         void SendPacket(ByteBuffer& buffer);
 

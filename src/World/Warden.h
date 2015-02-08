@@ -26,15 +26,15 @@ enum WardenOpcodes : uint8
     WARDEN_CMSG_MODULE_MISSING          = 0,
     WARDEN_CMSG_MODULE_OK               = 1,
     WARDEN_CMSG_CHEAT_CHECKS_RESULT     = 2,
-    WARDEN_CMSG_MEM_CHECKS_RESULT       = 3,    // only sent if MEM_CHECK bytes doesn't match
+    WARDEN_CMSG_MEM_CHECKS_RESULT       = 3,
     WARDEN_CMSG_HASH_RESULT             = 4,
-    WARDEN_CMSG_MODULE_FAILED           = 5,     // this is sent when client failed to load uploaded module due to cache fail
+    WARDEN_CMSG_MODULE_FAILED           = 5,
 
     WARDEN_SMSG_MODULE_USE              = 0,
     WARDEN_SMSG_MODULE_CACHE            = 1,
     WARDEN_SMSG_CHEAT_CHECKS_REQUEST    = 2,
     WARDEN_SMSG_MODULE_INITIALIZE       = 3,
-    WARDEN_SMSG_MEM_CHECKS_REQUEST      = 4,    // byte len; while (!EOF) { byte unk(1); byte index(++); string module(can be 0); int offset; byte len; byte[] bytes_to_compare[len]; }
+    WARDEN_SMSG_MEM_CHECKS_REQUEST      = 4,
     WARDEN_SMSG_HASH_REQUEST            = 5
 };
 
