@@ -48,15 +48,15 @@ bool WorldSocket::Connect(std::string address)
     if (receiverThread_.joinable())
         receiverThread_.join();
 
-    if (!TCPSocket::Connect(address))
-        return false;
-
-    packetCrypt_.Reset();
-
     inflateStream_.zalloc = Z_NULL;
     inflateStream_.zfree = Z_NULL;
     inflateStream_.opaque = Z_NULL;
     inflateInit(&inflateStream_);
+
+    if (!TCPSocket::Connect(address))
+        return false;
+
+    packetCrypt_.Reset();
 
     senderThread_ = std::thread(&WorldSocket::RunSenderThread, this);
     receiverThread_ = std::thread(&WorldSocket::RunReceiverThread, this);
