@@ -193,7 +193,7 @@ void WorldSocket::RunReceiverThread()
         receiveQueue_.push(packet);
     }
 
-    print("%s", "Disconnected from the server.");
+    std::cout << "Disconnected from the server." << std::endl;
 }
 
 void WorldSocket::DecompressPacket(std::shared_ptr<WorldPacket> packet)

@@ -28,7 +28,7 @@ void WorldSession::HandleConnectionVerification(WorldPacket &recvPacket)
 
     if (serverString != "RLD OF WARCRAFT CONNECTION - SERVER TO CLIENT")
     {
-        print("Connection verification failed. Invalid string received: %s", serverString.c_str());
+        std::cerr << "Connection verification failed. Invalid string received: " << serverString << std::endl;
         return;
     }
 
@@ -184,9 +184,9 @@ void WorldSession::HandleAuthenticationResponse(WorldPacket &recvPacket)
         recvPacket >> queuePosition;
 
         if (queuePosition > 0)
-            print("%s is full. Position in queue: %d", session_->GetRealmName().c_str(), queuePosition);
+            std::cout << session_->GetRealmName() << " is full. Position in queue: " << queuePosition << std::endl;
         else
-            print("%s is full.", session_->GetRealmName().c_str());
+            std::cout << session_->GetRealmName() << " is full. Please wait..." << std::endl;
 
         return;
     }
@@ -194,8 +194,8 @@ void WorldSession::HandleAuthenticationResponse(WorldPacket &recvPacket)
     if (!hasAccountInfo)
         return;
 
-    print("%s", "[World]");
-    print("%s", "Successfully authenticated!");
+    std::cout << "[World]" << std::endl;
+    std::cout << "Successfully authenticated!" << std::endl;
 
     WorldPacket packet(CMSG_REALM_SPLIT, 4);
     packet << uint32(0xFFFFFFFF);

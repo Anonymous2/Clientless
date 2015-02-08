@@ -19,13 +19,12 @@
 #include "Session.h"
 #include "Auth/AuthSession.h"
 #include "World/WorldSession.h"
-#include <iostream>
 
 int main(int argc, char* argv[])
 {
-    print("%s", "[Clientless World of Warcraft]");
-    print(" - Version: %d.%d.%d (%d)", GameVersion[0], GameVersion[1], GameVersion[2], GameBuild);
-    print(" - OS: %s Platform: %s Locale: %c%c%c%c", OS.c_str(), Platform.c_str(), Locale[0], Locale[1], Locale[2], Locale[3]);
+    std::cout << "[Clientless World of Warcraft]" << std::endl;
+    std::cout << " - Version: " << uint32(GameVersion[0]) << "." << uint32(GameVersion[1]) << " . " << uint32(GameVersion[2]) << " (" << GameBuild << ")" << std::endl;
+    std::cout << " - OS: " << OS << " Platform: " << Platform << " Locale: " << Locale[0] << Locale[1] << Locale[2] << Locale[3] << std::endl;
 
     std::shared_ptr<Session> session(new Session());
     
@@ -38,7 +37,7 @@ int main(int argc, char* argv[])
 
     if (!auth.Authenticate())
     {
-        print("%s", "Couldn't authenticate!");
+        std::cerr << "Couldn't authenticate!" << std::endl;
         return 1;
     }
 

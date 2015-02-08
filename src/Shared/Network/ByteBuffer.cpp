@@ -55,7 +55,7 @@ void ByteBuffer::print_storage() const
     for (uint32 i = 0; i < size(); ++i)
         o << read<uint8>(i) << " - ";
     o << " ";
-    print("%s", o.str().c_str());
+    std::cout << o.str() << std::endl;
 }
 
 void ByteBuffer::textlike() const
@@ -69,15 +69,15 @@ void ByteBuffer::textlike() const
         o << buf;
     }
     o << " ";
-    print("%s", o.str().c_str());
+    std::cout << o.str() << std::endl;
 }
 
 void ByteBuffer::hexlike() const
 {
-    print("%s", "BEGIN");
+    std::cout << "BEGIN" << std::endl;
 
     for (uint32 i = 0; i < size(); i++)
         printf("0x%02X ", read<uint8>(i));
 
-    print("%s", "\nEND");
+    std::cout << std::endl << "END" << std::endl;
 }

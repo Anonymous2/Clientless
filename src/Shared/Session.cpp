@@ -105,11 +105,11 @@ bool Session::SaveData()
 
 void Session::Print()
 {
-    print("%s", "[Current session]");
-    print(" - Authentication server: %s", authServerAddress_.c_str());
-    print(" - Account name: %s", accountName_.c_str());
-    print(" - Realm name: %s", realmName_.c_str());
-    print(" - Character name: %s", characterName_.c_str());
+    std::cout << "[Current session]" << std::endl;
+    std::cout << " - Authentication server: " << authServerAddress_ << std::endl;
+    std::cout << " - Account name: " << accountName_ << std::endl;
+    std::cout << " - Realm name: " << realmName_ << std::endl;
+    std::cout << " - Character name: " << characterName_ << std::endl;
 }
 
 std::string Session::GetAuthenticationServerAddress()

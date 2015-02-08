@@ -54,7 +54,7 @@ bool Warden::VerifyModule()
     // Check SHA-256 hash of module
     if (memcmp(module_->Hash, hash.GetDigest(), 256 / 8))
     {
-        error("%s", "[WARDEN]: Module is corrupted! (SHA-256)");
+        std::cerr << "[WARDEN]: Module is corrupted! (SHA-256)" << std::endl;
         return false;
     }
 
@@ -74,7 +74,7 @@ bool Warden::VerifyModule()
 
     if (sign != 1397311310)
     {
-        error("%s", "[WARDEN]: Module is corrupted! (SIGN)");
+        std::cerr << "[WARDEN]: Module is corrupted! (SIGN)" << std::endl;
         return false;
     }
     
@@ -103,7 +103,7 @@ bool Warden::VerifyModule()
     {
         if (blizzardHash.get()[i] != ourHash[31 - i])
         {
-            error("%s", "[WARDEN]: Module is corrupted! (RSA-512)");
+            std::cerr << "[WARDEN]: Module is corrupted! (RSA-512)" << std::endl;
             return false;
         }
     }
@@ -143,19 +143,19 @@ void Warden::InitializeModule()
 
     if (header[0] != 843861058) // 'BLL2'
     {
-        error("%s", "[Warden]: Invalid module header!");
+        std::cerr << "[Warden]: Invalid module header!" << std::endl;
         return;
     }
 
     if (header[1] != 2) // BLL version
     {
-        error("%s", "[Warden]: Invalid module header!");
+        std::cerr << "[Warden]: Invalid module header!" << std::endl;
         return;
     }
 
     if (header[2] != 332)
     {
-        error("%s", "[Warden]: Invalid module header!");
+        std::cerr << "[Warden]: Invalid module header!" << std::endl;
         return;
     }
 }

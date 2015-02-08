@@ -21,9 +21,7 @@
 #include <string>
 #include <cassert>
 #include <memory>
-
-#define print(fmt, ...) printf(fmt "\n", __VA_ARGS__)
-#define error(fmt, ...) printf("[ERROR]: " fmt "\n", __VA_ARGS__)
+#include <iostream>
 
 enum TimeConstants
 {

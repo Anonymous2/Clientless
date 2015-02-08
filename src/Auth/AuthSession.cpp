@@ -35,7 +35,7 @@ bool AuthSession::Authenticate()
 {
     if (!socket_.Connect(session_->GetAuthenticationServerAddress()))
     {
-        print("%s", "Couldn't connect to authserver.");
+        std::cerr << "Couldn't connect to authserver!" << std::endl;
         return false;
     }
     
@@ -130,8 +130,8 @@ bool AuthSession::HandleLogonChallengeResponse()
 
     if (header.Result != WOW_SUCCESS)
     {
-        print("%s", "[Authentication failed!]");
-        print("%s", AuthResultToStr(header.Result).c_str());
+        std::cerr << "[Authentication failed!]" << std::endl;
+        std::cerr << AuthResultToStr(header.Result) << std::endl;
         return false;
     }
 
@@ -157,7 +157,7 @@ bool AuthSession::HandleLogonChallengeResponse()
 
         if (security.RequestToken)
         {
-            print("%s", "[Authenticator]");
+            std::cout << "[Authenticator]" << std::endl;
             std::cout << "Please enter your token: ";
             std::getline(std::cin, token_);
         }
@@ -236,8 +236,8 @@ bool AuthSession::HandleLogonProofResponse()
 
     if (header.Result != WOW_SUCCESS)
     {
-        print("%s", "[Authentication failed!]");
-        print("%s", AuthResultToStr(header.Result).c_str());
+        std::cerr << "[Authentication failed!]" << std::endl;
+        std::cerr << AuthResultToStr(header.Result) << std::endl;
         LogonProofResponse_Error error;
         socket_.Read((char*)&error, sizeof(LogonProofResponse_Error));
         return false;
@@ -280,7 +280,7 @@ bool AuthSession::HandleRealmlistResponse()
 
     if (!header.Count)
     {
-        error("%s", "There are no realms!");
+        std::cerr << "There are no realms!" << std::endl;
         return false;
     }
 
@@ -295,7 +295,7 @@ bool AuthSession::HandleRealmlistResponse()
     {
         if (realm->Flags & REALM_FLAG_OFFLINE)
         {
-            error("%s", "The selected realm is offline!");
+            std::cerr << "The selected realm is offline!" << std::endl;
             return false;
         }
 
@@ -303,7 +303,7 @@ bool AuthSession::HandleRealmlistResponse()
     }
     else
     {
-        error("There is no realm named '%s'! Please choose another one!", session_->GetRealmName().c_str());
+        std::cerr << "There is no realm named '" << session_->GetRealmName() << "'! Please choose another one!" << std::endl;
         return false;
     }
 

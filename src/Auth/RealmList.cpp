@@ -54,7 +54,7 @@ void RealmList::Populate(uint32 count, ByteBuffer &buffer)
 
 void RealmList::Print()
 {
-    print("%s", "[Realmlist]");
+    std::cout << "[Realmlist]" << std::endl;
 
     for (Realm const& realm : list_)
     {
@@ -64,7 +64,7 @@ void RealmList::Print()
                 continue;
         }
 
-        print(" - %s [%s] (%s)", realm.Name.c_str(), realm.Address.c_str(), realm.Flags & REALM_FLAG_OFFLINE ? "Offline" : "Online");
+        std::cout << " - " << realm.Name << "[" << realm.Address << "] (" << (realm.Flags & REALM_FLAG_OFFLINE ? "Offline" : "Online") << ")" << std::endl;
     }
 }
 

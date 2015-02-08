@@ -107,10 +107,10 @@ void CharacterList::Populate(uint32 count, WorldPacket &recvPacket)
 
 void CharacterList::Print() const
 {
-    print("%s", "[Characterlist]");
+    std::cout << "[Characterlist]" << std::endl;
 
     for (Character const& character : list_)
-        print(" - %s (%s %s) [Level %d]", character.Name.c_str(), character.GetRaceAsStr().c_str(), character.GetClassAsStr().c_str(), character.Level);
+        std::cout << " - " << character.Name << "(" << character.GetRaceAsStr() << " " << character.GetClassAsStr() << " [Level " << character.Level << "]" << std::endl;
 }
 
 Character const* CharacterList::GetCharacterByName(std::string name) const

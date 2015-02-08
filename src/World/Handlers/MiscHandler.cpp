@@ -24,7 +24,7 @@ void WorldSession::HandleMOTD(WorldPacket &recvPacket)
     recvPacket >> lineCount;
 
     for (uint32 i = 0; i < lineCount; i++)
-        print("%s", recvPacket.read<std::string>().c_str());
+        std::cout << recvPacket.read<std::string>() << std::endl;
 }
 
 void WorldSession::HandlePong(WorldPacket &recvPacket)

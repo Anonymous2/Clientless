@@ -27,7 +27,7 @@ void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
 
     if (!count)
     {
-        error("%s", "You don't have any characters on this realm. Please create one first!");
+        std::cerr << "You don't have any characters on this realm. Please create one first!" << std::endl;
         socket_.Disconnect();
         return;
     }
@@ -79,7 +79,7 @@ void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
     }
     else
     {
-        error("There is no character named '%s' on this account! Please choose another one!", session_->GetCharacterName().c_str());
+        std::cerr << "There is no character named '" << session_->GetCharacterName() << "' on this account! Please choose another one!" << std::endl;
         socket_.Disconnect();
     }
 }

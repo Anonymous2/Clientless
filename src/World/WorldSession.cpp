@@ -77,9 +77,9 @@ void WorldSession::HandlePacket(std::shared_ptr<WorldPacket> recvPacket)
     }
     catch (ByteBufferException const& exception)
     {
-        error("%s", "ByteBufferException occured while handling a world packet!");
-        error("Opcode: 0x%04x", recvPacket->GetOpcode());
-        error("%s", exception.what());
+        std::cerr << "ByteBufferException occured while handling a world packet!" << std::endl;
+        std::cerr << "Opcode: 0x" << std::hex << std::uppercase << recvPacket->GetOpcode() << std::endl;
+        std::cerr << exception.what() << std::endl;
     }
 }
 

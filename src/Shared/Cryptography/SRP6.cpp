@@ -77,13 +77,13 @@ void SRP6::Calculate()
 
     if (B.IsZero() || (B % N).IsZero())
     {
-        print("%s", "SRP safeguard: B (mod N) was zero!");
+        std::cerr << "SRP safeguard: B (mod N) was zero!" << std::endl;
         return;
     }
 
     if (a > N || a == N)
     {
-        print("%s", "SRP safeguard: a must be less than N!");
+        std::cerr << "SRP safeguard: a must be less than N!" << std::endl;
         return;
     }
 
@@ -132,7 +132,7 @@ void SRP6::Calculate()
 
     if (u.IsZero())
     {
-        print("%s", "SRP safeguard: u must not be zero!");
+        std::cerr << "SRP safeguard: 'u' must not be zero!" << std::endl;
         return;
     }
 
@@ -142,7 +142,7 @@ void SRP6::Calculate()
 
     if (S.IsZero() || S.IsNegative())
     {
-        print("%s", "SRP safeguard: S must be greater than 0!");
+        std::cerr << "SRP safeguard: S must be greater than 0!" << std::endl;
         return;
     }
 
