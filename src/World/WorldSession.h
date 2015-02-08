@@ -16,8 +16,7 @@
  */
 
 #pragma once
-
-#include "Define.h"
+#include "Common.h"
 #include "Session.h"
 #include "Opcodes.h"
 #include "WorldPacket.h"
@@ -46,16 +45,16 @@ class WorldSession
         WorldSocket* GetSocket();
     private:
         std::shared_ptr<Session> session_;
-        uint32 clientSeed_;
-        uint32 serverSeed_;
+        uint32_t clientSeed_;
+        uint32_t serverSeed_;
 
         WorldSocket socket_;
         EventMgr eventMgr_;
         Player player_;
         Warden warden_;
 
-        uint64 lastPingTime_;
-        uint32 ping_;
+        uint64_t lastPingTime_;
+        uint32_t ping_;
 
         const std::vector<WorldOpcodeHandler> GetOpcodeHandlers();
         void HandlePacket(std::shared_ptr<WorldPacket> recvPacket);

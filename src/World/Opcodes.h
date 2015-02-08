@@ -18,10 +18,9 @@
  */
 
 #pragma once
+#include <cstdint>
 
-#include "Define.h"
-
-enum Opcodes : uint16
+enum Opcodes : uint16_t
 {
     NUM_OPCODE_HANDLERS                               = (0x7FFF+1),
     UNKNOWN_OPCODE                                    = 0xFFFF,

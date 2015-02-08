@@ -42,38 +42,38 @@ void WorldSession::HandleConnectionVerification(WorldPacket &recvPacket)
 void WorldSession::HandleAuthenticationChallenge(WorldPacket &recvPacket)
 {
     // Read server values
-    uint32 keys[8];
+    uint32_t keys[8];
 
     for (int i = 0; i < 8; i++)
         recvPacket >> keys[i];
 
     recvPacket >> serverSeed_;
 
-    uint8 unk;
+    uint8_t unk;
     recvPacket >> unk;
 
     // Generate our proof
-    uint32 zero = 0;
+    uint32_t zero = 0;
 
     SHA1 proof;
     proof.Update(session_->GetAccountName());
-    proof.Update((uint8*)&zero, sizeof(uint32));
-    proof.Update((uint8*)&clientSeed_, sizeof(uint32));
-    proof.Update((uint8*)&serverSeed_, sizeof(uint32));
+    proof.Update((uint8_t*)&zero, sizeof(uint32_t));
+    proof.Update((uint8_t*)&clientSeed_, sizeof(uint32_t));
+    proof.Update((uint8_t*)&serverSeed_, sizeof(uint32_t));
     proof.Update(session_->GetKey());
     proof.Finalize();
 
-    uint8* digest = proof.GetDigest();
+    uint8_t* digest = proof.GetDigest();
  
     WorldPacket response(CMSG_AUTH_SESSION);
-    response << uint32(0); // 00 00 00 00 [4.3.4 15595 enUS]
-    response << uint32(0); // 00 00 00 00 [4.3.4 15595 enUS]
-    response << uint8(0); // 00 [4.3.4 15595 enUS]
+    response << uint32_t(0); // 00 00 00 00 [4.3.4 15595 enUS]
+    response << uint32_t(0); // 00 00 00 00 [4.3.4 15595 enUS]
+    response << uint8_t(0); // 00 [4.3.4 15595 enUS]
     response << digest[10];
     response << digest[18];
     response << digest[12];
     response << digest[5];
-    response << uint64(3); // 03 00 00 00 00 00 00 00 [4.3.4 15595 enUS]
+    response << uint64_t(3); // 03 00 00 00 00 00 00 00 [4.3.4 15595 enUS]
     response << digest[15];
     response << digest[9];
     response << digest[19];
@@ -81,33 +81,33 @@ void WorldSession::HandleAuthenticationChallenge(WorldPacket &recvPacket)
     response << digest[7];
     response << digest[16];
     response << digest[3];
-    response << uint16(GameBuild);
+    response << uint16_t(GameBuild);
     response << digest[8];
-    response << uint32(1); // 01 00 00 00  [4.3.4 15595 enUS]
-    response << uint8(1);
+    response << uint32_t(1); // 01 00 00 00  [4.3.4 15595 enUS]
+    response << uint8_t(1);
     response << digest[17];
     response << digest[6];
     response << digest[0];
     response << digest[1];
     response << digest[11];
-    response << uint32(clientSeed_);
+    response << uint32_t(clientSeed_);
     response << digest[2];
-    response << uint32(0); // 00 00 00 00 [4.3.4 15595 enUS]
+    response << uint32_t(0); // 00 00 00 00 [4.3.4 15595 enUS]
     response << digest[14];
     response << digest[13];
 
     ByteBuffer addonData;
-    addonData << uint32(AddonDatabase.size());
+    addonData << uint32_t(AddonDatabase.size());
 
     for (auto const& addon : AddonDatabase)
     {
         addonData << addon.Name;
-        addonData << uint8(addon.Enabled);
-        addonData << uint32(addon.CRC);
-        addonData << uint32(addon.Unknown);
+        addonData << uint8_t(addon.Enabled);
+        addonData << uint32_t(addon.CRC);
+        addonData << uint32_t(addon.Unknown);
     }
 
-    addonData << uint32(0x4B44A47C); // 7C A4 44 4B [4.3.4 15595 enUS]
+    addonData << uint32_t(0x4B44A47C); // 7C A4 44 4B [4.3.4 15595 enUS]
 
     uLongf compressedSize = compressBound(addonData.size());
 
@@ -117,8 +117,8 @@ void WorldSession::HandleAuthenticationChallenge(WorldPacket &recvPacket)
     if (compress(addonDataCompressed.contents(), &compressedSize, addonData.contents(), addonData.size()) != Z_OK)
         assert(false);
 
-    response << uint32(4 + compressedSize);
-    response << uint32(addonData.size());
+    response << uint32_t(4 + compressedSize);
+    response << uint32_t(addonData.size());
     response.append(addonDataCompressed.contents(), compressedSize);
 
     response.WriteBit(0);
@@ -129,7 +129,7 @@ void WorldSession::HandleAuthenticationChallenge(WorldPacket &recvPacket)
     SendPacket(response);
 }
 
-enum AuthResult : uint8
+enum AuthResult : uint8_t
 {
     AUTH_OK                     = 12,
     AUTH_FAILED                 = 13,
@@ -158,8 +158,8 @@ enum AuthResult : uint8
 
 void WorldSession::HandleAuthenticationResponse(WorldPacket &recvPacket)
 {
-    uint32 billingTimeRemaining, billingTimeRested, queuePosition;
-    uint8 billingPlanFlags, result, expansion;
+    uint32_t billingTimeRemaining, billingTimeRested, queuePosition;
+    uint8_t billingPlanFlags, result, expansion;
     bool hasQueueInfo, hasAccountInfo;
 
     hasQueueInfo = recvPacket.ReadBit();
@@ -198,7 +198,7 @@ void WorldSession::HandleAuthenticationResponse(WorldPacket &recvPacket)
     std::cout << "Successfully authenticated!" << std::endl;
 
     WorldPacket packet(CMSG_REALM_SPLIT, 4);
-    packet << uint32(0xFFFFFFFF);
+    packet << uint32_t(0xFFFFFFFF);
     SendPacket(packet);
 
     packet.Initialize(CMSG_CHAR_ENUM, 0);

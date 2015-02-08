@@ -51,22 +51,22 @@ void SRP6::SetCredentials(std::string name, std::string password)
     AccountName = name;
     AccountPassword = password;
 }
-void SRP6::SetServerModulus(uint8* buffer, uint32 length)
+void SRP6::SetServerModulus(uint8_t* buffer, uint32_t length)
 {
     N.SetBinary(buffer, length);
 }
 
-void SRP6::SetServerGenerator(uint8* buffer, uint32 length)
+void SRP6::SetServerGenerator(uint8_t* buffer, uint32_t length)
 {
     g.SetBinary(buffer, length);
 }
 
-void SRP6::SetServerEphemeralB(uint8* buffer, uint32 length)
+void SRP6::SetServerEphemeralB(uint8_t* buffer, uint32_t length)
 {
     B.SetBinary(buffer, length);
 }
 
-void SRP6::SetServerSalt(uint8* buffer, uint32 length)
+void SRP6::SetServerSalt(uint8_t* buffer, uint32_t length)
 {
     s.SetBinary(buffer, length);
 }
@@ -97,9 +97,9 @@ void SRP6::Calculate()
     hN.Update(N);
     hN.Finalize();
 
-    uint8 bI[20];
+    uint8_t bI[20];
 
-    for (uint32 i = 0; i < 20; i++)
+    for (uint32_t i = 0; i < 20; i++)
         bI[i] = hg.GetDigest()[i] ^ hN.GetDigest()[i];
 
     I.SetBinary(bI, 20);
@@ -148,7 +148,7 @@ void SRP6::Calculate()
 
     // K
 
-    uint8 SPart[2][16];
+    uint8_t SPart[2][16];
 
     for (int i = 0; i < 16; i++)
     {
@@ -164,9 +164,9 @@ void SRP6::Calculate()
     hOdd.Update(SPart[1], 16);
     hOdd.Finalize();
 
-    uint8 bK[40];
+    uint8_t bK[40];
 
-    for (uint32 i = 0; i < 20; i++)
+    for (uint32_t i = 0; i < 20; i++)
     {
         bK[i * 2] = hEven.GetDigest()[i];
         bK[i * 2 + 1] = hOdd.GetDigest()[i];
@@ -219,7 +219,7 @@ void SRP6::Calculate()
 */
 }
 
-bool SRP6::IsValidM2(uint8* buffer, uint32 length)
+bool SRP6::IsValidM2(uint8_t* buffer, uint32_t length)
 {
     BigNumber temp(buffer, length);
     return temp == M2;

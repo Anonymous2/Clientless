@@ -18,7 +18,6 @@
  */
 
 #include "ByteBuffer.h"
-#include "Define.h"
 #include <sstream>
 
 #if _MSC_VER
@@ -52,8 +51,8 @@ void ByteBuffer::print_storage() const
 {
     std::ostringstream o;
     o << "STORAGE_SIZE: " << size();
-    for (uint32 i = 0; i < size(); ++i)
-        o << read<uint8>(i) << " - ";
+    for (uint32_t i = 0; i < size(); ++i)
+        o << read<uint8_t>(i) << " - ";
     o << " ";
     std::cout << o.str() << std::endl;
 }
@@ -62,10 +61,10 @@ void ByteBuffer::textlike() const
 {
     std::ostringstream o;
     o << "STORAGE_SIZE: " << size();
-    for (uint32 i = 0; i < size(); ++i)
+    for (uint32_t i = 0; i < size(); ++i)
     {
         char buf[1];
-        snprintf(buf, 1, "%c", read<uint8>(i));
+        snprintf(buf, 1, "%c", read<uint8_t>(i));
         o << buf;
     }
     o << " ";
@@ -76,8 +75,8 @@ void ByteBuffer::hexlike() const
 {
     std::cout << "BEGIN" << std::endl;
 
-    for (uint32 i = 0; i < size(); i++)
-        printf("0x%02X ", read<uint8>(i));
+    for (uint32_t i = 0; i < size(); i++)
+        printf("0x%02X ", read<uint8_t>(i));
 
     std::cout << std::endl << "END" << std::endl;
 }

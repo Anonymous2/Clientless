@@ -20,22 +20,22 @@
 
 void WorldSession::HandleMOTD(WorldPacket &recvPacket)
 {
-    uint32 lineCount;
+    uint32_t lineCount;
     recvPacket >> lineCount;
 
-    for (uint32 i = 0; i < lineCount; i++)
+    for (uint32_t i = 0; i < lineCount; i++)
         std::cout << recvPacket.read<std::string>() << std::endl;
 }
 
 void WorldSession::HandlePong(WorldPacket &recvPacket)
 {
-    uint32 ping;
+    uint32_t ping;
     recvPacket >> ping;
 
     std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
 
-    ping_ = uint32(lastPingTime_ - ms.count());
+    ping_ = uint32_t(lastPingTime_ - ms.count());
     lastPingTime_ = 0;
 }
 
@@ -47,14 +47,14 @@ void WorldSession::SendPing()
     lastPingTime_ = ms.count();
 
     WorldPacket packet(CMSG_PING);
-    packet << uint32(ping_);
-    packet << uint32(ping_ / 2);
+    packet << uint32_t(ping_);
+    packet << uint32_t(ping_ / 2);
     SendPacket(packet);
 }
 
 void WorldSession::HandleTimeSyncRequest(WorldPacket &recvPacket)
 {
-    uint32 timeSyncCounter;
+    uint32_t timeSyncCounter;
     recvPacket >> timeSyncCounter;
 
     std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
@@ -62,6 +62,6 @@ void WorldSession::HandleTimeSyncRequest(WorldPacket &recvPacket)
 
     WorldPacket packet(CMSG_TIME_SYNC_RESP, 8);
     packet << timeSyncCounter;
-    packet << uint32(ms.count());
+    packet << uint32_t(ms.count());
     SendPacket(packet);
 }

@@ -16,8 +16,6 @@
  */
 
 #pragma once
-
-#include "Define.h"
 #include "Common.h"
 #include <vector>
 
@@ -25,8 +23,8 @@ struct Addon
 {
     std::string Name;
     bool Enabled;
-    uint32 CRC;
-    uint32 Unknown;
+    uint32_t CRC;
+    uint32_t Unknown;
 };
 
 extern std::vector<Addon> const AddonDatabase;

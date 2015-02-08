@@ -18,10 +18,9 @@
  */
 
 #pragma once
+#include <cstdint>
 
-#include "Define.h"
-
-enum AuthResult : uint8
+enum AuthResult : uint8_t
 {
     WOW_SUCCESS                                  = 0x00,
     WOW_FAIL_BANNED                              = 0x03,

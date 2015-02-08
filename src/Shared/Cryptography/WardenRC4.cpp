@@ -31,7 +31,7 @@ WardenRC4::~WardenRC4()
 
 void WardenRC4::Initialize(const BigNumber* key)
 {
-    uint32 half = key->GetNumBytes() / 2;
+    uint32_t half = key->GetNumBytes() / 2;
 
     memset(buffer_[0], 0, 20);
 
@@ -39,7 +39,7 @@ void WardenRC4::Initialize(const BigNumber* key)
     firstHash.Update(key->AsByteArray().get(), half);
     firstHash.Finalize();
 
-    uint32 dglen = firstHash.GetDigestLength();
+    uint32_t dglen = firstHash.GetDigestLength();
     memcpy(buffer_[1], firstHash.GetDigest(), firstHash.GetDigestLength());
 
     SHA1 secondHash;
@@ -50,7 +50,7 @@ void WardenRC4::Initialize(const BigNumber* key)
 
     FillUp();
 
-    uint8 encryptionKey[16], decryptionKey[16];
+    uint8_t encryptionKey[16], decryptionKey[16];
 
     Generate(&encryptionKey[0], 16);
     encryptionStream_.Initialize(encryptionKey);
@@ -66,7 +66,7 @@ bool WardenRC4::IsInitialized()
     return ready_;
 }
 
-void WardenRC4::Encrypt(uint8* data, uint32 size)
+void WardenRC4::Encrypt(uint8_t* data, uint32_t size)
 {
     if (!ready_)
         return;
@@ -74,7 +74,7 @@ void WardenRC4::Encrypt(uint8* data, uint32 size)
     encryptionStream_.Update(data, size);
 }
 
-void WardenRC4::Decrypt(uint8* data, uint32 size)
+void WardenRC4::Decrypt(uint8_t* data, uint32_t size)
 {
     if (!ready_)
         return;
@@ -95,9 +95,9 @@ void WardenRC4::FillUp()
     taken_ = 0;
 }
 
-void WardenRC4::Generate(uint8* buffer, uint32 size)
+void WardenRC4::Generate(uint8_t* buffer, uint32_t size)
 {
-    for (uint32 i = 0; i < size; ++i)
+    for (uint32_t i = 0; i < size; ++i)
     {
         if (taken_ == 20)
             FillUp();

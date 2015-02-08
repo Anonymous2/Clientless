@@ -16,8 +16,7 @@
  */
 
 #pragma once
-
-#include "Define.h"
+#include "Common.h"
 #include "Character.h"
 
 struct Player : public Character
@@ -25,7 +24,7 @@ struct Player : public Character
     Player() { }
     Player(Character character) : Character(character) { }
 
-    std::list<uint32> Spells;
-    std::map<uint32, uint32> SpellCooldowns;
-    std::map<uint32, uint32> SpellCategoryCooldowns;
+    std::list<uint32_t> Spells;
+    std::map<uint32_t, uint32_t> SpellCooldowns;
+    std::map<uint32_t, uint32_t> SpellCategoryCooldowns;
 };

@@ -18,12 +18,12 @@
 #include "RealmList.h"
 #include "Config.h"
 
-void RealmList::Populate(uint32 count, ByteBuffer &buffer)
+void RealmList::Populate(uint32_t count, ByteBuffer &buffer)
 {
     list_.clear();
     list_.resize(count);
 
-    for (uint32 i = 0; i < count; i++)
+    for (uint32_t i = 0; i < count; i++)
     {
         Realm realm;
 
@@ -48,8 +48,8 @@ void RealmList::Populate(uint32 count, ByteBuffer &buffer)
         list_[i] = realm;
     }
 
-    buffer.read_skip<uint8>();
-    buffer.read_skip<uint8>();
+    buffer.read_skip<uint8_t>();
+    buffer.read_skip<uint8_t>();
 }
 
 void RealmList::Print()

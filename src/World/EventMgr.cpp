@@ -30,7 +30,7 @@ EventId Event::GetId()
     return id_;
 }
 
-void Event::SetPeriod(uint32 period)
+void Event::SetPeriod(uint32_t period)
 {
     period_ = period;
     remaining_ = period;
@@ -46,7 +46,7 @@ void Event::SetEnabled(bool enabled)
     enabled_ = enabled;
 }
 
-void Event::Update(uint32 diff)
+void Event::Update(uint32_t diff)
 {
     if (!enabled_)
         return;
@@ -118,7 +118,7 @@ void EventMgr::Stop()
 
 void EventMgr::ProcessEvents()
 {
-    uint32 diff = 0;
+    uint32_t diff = 0;
 
     while (isRunning_)
     {
@@ -131,7 +131,7 @@ void EventMgr::ProcessEvents()
 
         std::this_thread::sleep_for(milliseconds(5));
         system_clock::time_point end = high_resolution_clock::now();
-        diff = uint32(duration_cast<milliseconds>(end - start).count());
+        diff = uint32_t(duration_cast<milliseconds>(end - start).count());
     }
 
     std::lock_guard<std::recursive_mutex> lock(eventMutex_);

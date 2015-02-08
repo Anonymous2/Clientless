@@ -18,16 +18,16 @@
  */
 
 #pragma once
-#include "Define.h"
+#include <cstdint>
 
-enum Genders : uint8
+enum Genders : uint8_t
 {
     GENDER_MALE                        = 0,
     GENDER_FEMALE                      = 1,
     GENDER_NONE                        = 2
 };
 
-enum Races : uint8
+enum Races : uint8_t
 {
     RACE_NONE               = 0,
     RACE_HUMAN              = 1,
@@ -44,7 +44,7 @@ enum Races : uint8
     RACE_WORGEN             = 22
 };
 
-enum Classes : uint8
+enum Classes : uint8_t
 {
     CLASS_NONE          = 0,
     CLASS_WARRIOR       = 1,
@@ -56,7 +56,6 @@ enum Classes : uint8
     CLASS_SHAMAN        = 7,
     CLASS_MAGE          = 8,
     CLASS_WARLOCK       = 9,
-    //CLASS_UNK           = 10,
     CLASS_DRUID         = 11
 };
 

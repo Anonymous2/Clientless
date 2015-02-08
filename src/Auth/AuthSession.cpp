@@ -56,23 +56,23 @@ void AuthSession::SendPacket(ByteBuffer& buffer)
 bool AuthSession::SendLogonChallenge()
 {
     ByteBuffer packet;
-    packet << uint8(AUTH_LOGON_CHALLENGE);
-    packet << uint8(8);
-    packet << uint16(session_->GetAccountName().length() + 30);
+    packet << uint8_t(AUTH_LOGON_CHALLENGE);
+    packet << uint8_t(8);
+    packet << uint16_t(session_->GetAccountName().length() + 30);
     packet << GameName;
-    packet << uint8(GameVersion[0]);
-    packet << uint8(GameVersion[1]);
-    packet << uint8(GameVersion[2]);
-    packet << uint16(GameBuild);
+    packet << uint8_t(GameVersion[0]);
+    packet << uint8_t(GameVersion[1]);
+    packet << uint8_t(GameVersion[2]);
+    packet << uint16_t(GameBuild);
     packet << std::string(Platform.rbegin(), Platform.rend());
     packet << std::string(OS.rbegin(), OS.rend());
-    packet << uint8(Locale[3]);
-    packet << uint8(Locale[2]);
-    packet << uint8(Locale[1]);
-    packet << uint8(Locale[0]);
-    packet << uint32(TimeZone);
-    packet << uint32(IP);
-    packet << uint8(session_->GetAccountName().length());
+    packet << uint8_t(Locale[3]);
+    packet << uint8_t(Locale[2]);
+    packet << uint8_t(Locale[1]);
+    packet << uint8_t(Locale[0]);
+    packet << uint32_t(TimeZone);
+    packet << uint32_t(IP);
+    packet << uint8_t(session_->GetAccountName().length());
     packet.append(session_->GetAccountName().c_str(), session_->GetAccountName().length());
 
     SendPacket(packet);
@@ -84,36 +84,36 @@ bool AuthSession::SendLogonChallenge()
 struct LogonChallengeResponse_Header
 {
     AuthCmd Opcode;
-    uint8 Unk;
+    uint8_t Unk;
     AuthResult Result;
 };
  
 struct LogonChallengeResponse_Body
 {
-    uint8 B[32];
-    uint8 g_length;
-    uint8 g[1];
-    uint8 N_length;
-    uint8 N[32];
-    uint8 Salt[32];
-    uint8 CRCSalt[16];
-    uint8 SecurityFlags;
+    uint8_t B[32];
+    uint8_t g_length;
+    uint8_t g[1];
+    uint8_t N_length;
+    uint8_t N[32];
+    uint8_t Salt[32];
+    uint8_t CRCSalt[16];
+    uint8_t SecurityFlags;
 };
 
 struct LogonChallengeResponse_PIN
 {
-    uint32 Unk1;
-    uint64 Unk2;
-    uint64 Unk3;
+    uint32_t Unk1;
+    uint64_t Unk2;
+    uint64_t Unk3;
 };
 
 struct LogonChallengeResponse_Matrix
 {
-    uint8 Unk1;
-    uint8 Unk2;
-    uint8 Unk3;
-    uint8 Unk4;
-    uint64 Unk5;
+    uint8_t Unk1;
+    uint8_t Unk2;
+    uint8_t Unk3;
+    uint8_t Unk4;
+    uint64_t Unk5;
 };
 
 struct LogonChallengeResponse_Token
@@ -183,21 +183,21 @@ bool AuthSession::SendLogonProof()
     crc.SetRandom(20 * 8);
 
     ByteBuffer packet;
-    packet << uint8(AUTH_LOGON_PROOF);
+    packet << uint8_t(AUTH_LOGON_PROOF);
     packet.append(srp6_.GetClientEphemeralA()->AsByteArray(32).get(), 32);
     packet.append(srp6_.GetClientM1()->AsByteArray(20).get(), 20);
     packet.append(crc.AsByteArray(20).get(), 20);
 
     if (token_.empty())
     {
-        packet << uint8(0);
-        packet << uint8(0);
+        packet << uint8_t(0);
+        packet << uint8_t(0);
     }
     else
     {
-        packet << uint8(1);
-        packet << uint8(0x04);
-        packet << uint8(token_.size() + 1);
+        packet << uint8_t(1);
+        packet << uint8_t(0x04);
+        packet << uint8_t(token_.size() + 1);
         packet << token_;
     }
 
@@ -215,16 +215,16 @@ struct LogonProofResponse_Header
 
 struct LogonProofResponse_Error
 {
-    uint8 Unk1;
-    uint8 Unk2;
+    uint8_t Unk1;
+    uint8_t Unk2;
 };
  
 struct LogonProofResponse_Body
 {
-    uint8   M2[20];
-    uint32  AccountFlags;
-    uint32  SurveyId;
-    uint16  Unk;
+    uint8_t   M2[20];
+    uint32_t  AccountFlags;
+    uint32_t  SurveyId;
+    uint16_t  Unk;
 };
  
 #pragma pack(pop)
@@ -255,8 +255,8 @@ bool AuthSession::HandleLogonProofResponse()
 bool AuthSession::SendRealmlistRequest()
 {
     ByteBuffer packet;
-    packet << uint8(REALM_LIST);
-    packet << uint32(0x1000);
+    packet << uint8_t(REALM_LIST);
+    packet << uint32_t(0x1000);
     SendPacket(packet);
     return HandleRealmlistResponse();
 }
@@ -266,9 +266,9 @@ bool AuthSession::SendRealmlistRequest()
 struct RealmlistResponse_Header
 {
     AuthCmd Opcode;
-    uint16 Length;
-    uint32 Unk;
-    uint16 Count;
+    uint16_t Length;
+    uint32_t Unk;
+    uint16_t Count;
 };
 
 #pragma pack(pop)

@@ -19,14 +19,14 @@
 
 #include "RC4.h"
 
-RC4::RC4(int32 len) : ctx_()
+RC4::RC4(int32_t len) : ctx_()
 {
     EVP_CIPHER_CTX_init(&ctx_);
     EVP_EncryptInit_ex(&ctx_, EVP_rc4(), nullptr, nullptr, nullptr);
     EVP_CIPHER_CTX_set_key_length(&ctx_, len);
 }
 
-RC4::RC4(uint8* seed, int32 len) : ctx_()
+RC4::RC4(uint8_t* seed, int32_t len) : ctx_()
 {
     EVP_CIPHER_CTX_init(&ctx_);
     EVP_EncryptInit_ex(&ctx_, EVP_rc4(), nullptr, nullptr, nullptr);
@@ -39,14 +39,14 @@ RC4::~RC4()
     EVP_CIPHER_CTX_cleanup(&ctx_);
 }
 
-void RC4::Initialize(uint8* seed)
+void RC4::Initialize(uint8_t* seed)
 {
     EVP_EncryptInit_ex(&ctx_, nullptr, nullptr, seed, nullptr);
 }
 
-void RC4::Update(uint8* data, int32 len)
+void RC4::Update(uint8_t* data, int32_t len)
 {
-    int32 outlen = 0;
+    int32_t outlen = 0;
     EVP_EncryptUpdate(&ctx_, data, &outlen, data, len);
     EVP_EncryptFinal_ex(&ctx_, data, &outlen);
 }

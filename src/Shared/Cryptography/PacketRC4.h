@@ -31,8 +31,8 @@ class PacketRC4
 
         void Initialize(const BigNumber* key);
         void Reset();
-        void DecryptReceived(uint8* data, int32 len);
-        void EncryptSend(uint8* data, int32 len);
+        void DecryptReceived(uint8_t* data, int32_t len);
+        void EncryptSend(uint8_t* data, int32_t len);
         bool IsInitialized() { return ready_; }
 
     private:

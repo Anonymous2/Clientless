@@ -16,15 +16,13 @@
  */
 
 #pragma once
-
-#include "Define.h"
 #include "Common.h"
 
 static const std::string GameName = "WoW";
-static const uint8  GameVersion[3] = { 4, 3, 4 };       // Expansion, Major, Minor
-static const uint16 GameBuild = 15595;
+static const uint8_t  GameVersion[3] = { 4, 3, 4 };       // Expansion, Major, Minor
+static const uint16_t GameBuild = 15595;
 static const std::string Platform = "x86";              // x86 | x64 | PPC
 static const std::string OS = "OSX";                    // Win | OSX
-static const uint8 Locale[4] = { 'e', 'n', 'U', 'S' };  // enUS | enGB | frFR | deDE | koKR | zhCN | zhTW | ruRU | esES | esMX | ptBR
-static const uint32 TimeZone = 0x3C;
-static const uint32 IP = 0x0100007F;
+static const uint8_t Locale[4] = { 'e', 'n', 'U', 'S' };  // enUS | enGB | frFR | deDE | koKR | zhCN | zhTW | ruRU | esES | esMX | ptBR
+static const uint32_t TimeZone = 0x3C;
+static const uint32_t IP = 0x0100007F;

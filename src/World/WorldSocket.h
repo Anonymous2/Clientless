@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "Define.h"
+#include "Common.h"
 #include "Network/TCPSocket.h"
 #include "Cryptography/PacketRC4.h"
 #include "WorldPacket.h"

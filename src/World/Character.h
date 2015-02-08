@@ -16,8 +16,6 @@
  */
 
 #pragma once
-
-#include "Define.h"
 #include "Common.h"
 #include "Position.h"
 #include "ObjectGuid.h"
@@ -25,32 +23,32 @@
 
 struct CharacterDisplay
 {
-    uint8 Skin;
-    uint8 Face;
-    uint8 HairStyle;
-    uint8 HairColor;
-    uint8 FacialHair;
+    uint8_t Skin;
+    uint8_t Face;
+    uint8_t HairStyle;
+    uint8_t HairColor;
+    uint8_t FacialHair;
 };
 
 struct CharacterPet
 {
-    uint32 DisplayId;
-    uint32 Level;
-    uint32 Family;
+    uint32_t DisplayId;
+    uint32_t Level;
+    uint32_t Family;
 };
 
 struct CharacterItems
 {
-    uint32 DisplayId;
-    uint8 InventoryType;
-    uint32 EnchantAuraId;
+    uint32_t DisplayId;
+    uint8_t InventoryType;
+    uint32_t EnchantAuraId;
 };
 
 struct CharacterBags
 {
-    uint32 DisplayId;
-    uint8 InventoryType;
-    uint32 EnchantId;
+    uint32_t DisplayId;
+    uint8_t InventoryType;
+    uint32_t EnchantId;
 };
 
 struct Character
@@ -61,14 +59,14 @@ struct Character
     Classes Class;
     Genders Gender;
     CharacterDisplay Display;
-    uint8 Level;
-    uint32 AreaId;
-    uint32 MapId;
+    uint8_t Level;
+    uint32_t AreaId;
+    uint32_t MapId;
     Position4D Position;
     ObjectGuid GuildGuid;
-    uint32 Flags;
-    uint32 CustomizationFlags;
-    uint8 Slot;
+    uint32_t Flags;
+    uint32_t CustomizationFlags;
+    uint8_t Slot;
     bool IsFirstLogin;
     CharacterPet Pet;
     CharacterItems Items[19];

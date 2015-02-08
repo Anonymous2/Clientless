@@ -31,14 +31,14 @@ SHA1::~SHA1()
     EVP_MD_CTX_cleanup(&ctx_);
 }
 
-void SHA1::Update(const uint8* data, int32 len)
+void SHA1::Update(const uint8_t* data, int32_t len)
 {
     EVP_DigestUpdate(&ctx_, data, len);
 }
 
 void SHA1::Update(const std::string &str)
 {
-    Update((const uint8*)str.c_str(), str.length());
+    Update((const uint8_t*)str.c_str(), str.length());
 }
 
 void SHA1::Update(const BigNumber &bn)

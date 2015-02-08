@@ -18,7 +18,7 @@
 #pragma once
 
 #pragma once
-#include "Define.h"
+#include <cstdint>
 #include "Cryptography/BigNumber.h"
 #include "Auth/RealmList.h"
 

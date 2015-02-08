@@ -18,10 +18,9 @@
  */
 
 #pragma once
+#include <cstdint>
 
-#include "Define.h"
-
-enum AuthCmd : uint8
+enum AuthCmd : uint8_t
 {
     AUTH_LOGON_CHALLENGE 			= 0x00,
     AUTH_LOGON_PROOF 				= 0x01,

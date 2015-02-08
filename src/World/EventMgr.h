@@ -16,8 +16,7 @@
  */
 
 #pragma once
-
-#include "Define.h"
+#include <cstdint>
 #include <list>
 #include <functional>
 #include <thread>
@@ -40,16 +39,16 @@ class Event
 
         EventId GetId();
 
-        void SetPeriod(uint32 period);
+        void SetPeriod(uint32_t period);
         void SetEnabled(bool enabled);
         void SetCallback(EventCallback callback);
 
-        void Update(uint32 diff);
+        void Update(uint32_t diff);
     private:
         EventId id_;
         bool enabled_;
-        uint32 period_;
-        int32 remaining_;
+        uint32_t period_;
+        int32_t remaining_;
         EventCallback callback_;
 };
 

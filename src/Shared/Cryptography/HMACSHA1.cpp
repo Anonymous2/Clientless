@@ -20,7 +20,7 @@
 #include "HMACSHA1.h"
 #include "BigNumber.h"
 
-HMACSHA1::HMACSHA1(uint8* seed, uint32 len)
+HMACSHA1::HMACSHA1(uint8_t* seed, uint32_t len)
 {
     HMAC_CTX_init(&ctx_);
     HMAC_Init_ex(&ctx_, seed, len, EVP_sha1(), nullptr);
@@ -31,14 +31,14 @@ HMACSHA1::~HMACSHA1()
     HMAC_CTX_cleanup(&ctx_);
 }
 
-void HMACSHA1::Update(const uint8* data, int32 len)
+void HMACSHA1::Update(const uint8_t* data, int32_t len)
 {
     HMAC_Update(&ctx_, data, len);
 }
 
 void HMACSHA1::Update(const std::string &str)
 {
-    Update((const uint8*)str.c_str(), str.length());
+    Update((const uint8_t*)str.c_str(), str.length());
 }
 
 void HMACSHA1::Update(const BigNumber &bn)

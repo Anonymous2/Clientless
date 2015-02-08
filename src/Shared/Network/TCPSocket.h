@@ -16,8 +16,7 @@
  */
 
 #pragma once
-
-#include "Define.h"
+#include <cstdint>
 #include "ByteBuffer.h"
 
 #ifdef _WIN32
@@ -36,9 +35,9 @@ class TCPSocket
         virtual void Disconnect();
         bool IsConnected();
 
-        int32 Read(char* buffer, uint32 length);
-        int32 Read(ByteBuffer* buffer, uint32 length);
-        int32 Send(uint8 const* buffer, uint32 length);
+        int32_t Read(char* buffer, uint32_t length);
+        int32_t Read(ByteBuffer* buffer, uint32_t length);
+        int32_t Send(uint8_t const* buffer, uint32_t length);
 
     private:
         SOCKET socket_;

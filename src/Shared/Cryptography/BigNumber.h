@@ -18,8 +18,7 @@
  */
 
 #pragma once
-
-#include "Define.h"
+#include <cstdint>
 #include <memory>
 
 struct bignum_st;
@@ -29,16 +28,16 @@ class BigNumber
     public:
         BigNumber();
         BigNumber(BigNumber const& bn);
-        BigNumber(uint32 val);
-        BigNumber(uint8 const* buffer, int32 length);
+        BigNumber(uint32_t val);
+        BigNumber(uint8_t const* buffer, int32_t length);
         ~BigNumber();
 
         void SetZero();
         void SetOne();
-        void SetUInt32(uint32 value);
-        void SetUInt64(uint64 value);
-        void SetBinary(uint8 const* bytes, int32 len);
-        void SetRandom(int32 length);
+        void SetUInt32(uint32_t value);
+        void SetUInt64(uint64_t value);
+        void SetBinary(uint8_t const* bytes, int32_t len);
+        void SetRandom(int32_t length);
         void SetHexString(const char* str);
 
         void Negate();
@@ -94,13 +93,13 @@ class BigNumber
         BigNumber ModExp(BigNumber const& bn1, BigNumber const& bn2);
         BigNumber Exp(BigNumber const&);
 
-        int32 GetNumBytes(void) const;
+        int32_t GetNumBytes(void) const;
 
         struct bignum_st* BN() { return bn_; }
 
-        uint32 AsDword();
+        uint32_t AsDword();
 
-        std::unique_ptr<uint8[]> AsByteArray(int32 minSize = 0, bool littleEndian = true) const;
+        std::unique_ptr<uint8_t[]> AsByteArray(int32_t minSize = 0, bool littleEndian = true) const;
 
         char* AsHexStr() const;
         char* AsDecStr() const;

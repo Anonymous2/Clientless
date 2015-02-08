@@ -16,12 +16,12 @@
  */
 
 #pragma once
-#include "Define.h"
+#include "Common.h"
 #include "WorldPacket.h"
 #include "Cryptography/WardenRC4.h"
 #include <memory>
 
-enum WardenOpcodes : uint8
+enum WardenOpcodes : uint8_t
 {
     WARDEN_CMSG_MODULE_MISSING          = 0,
     WARDEN_CMSG_MODULE_OK               = 1,
@@ -40,13 +40,13 @@ enum WardenOpcodes : uint8
 
 struct WardenModule
 {
-    uint8 Hash[32];
-    uint8 DecryptionKey[16];
-    uint32 Size;
-    uint32 DecompressedSize;
+    uint8_t Hash[32];
+    uint8_t DecryptionKey[16];
+    uint32_t Size;
+    uint32_t DecompressedSize;
     ByteBuffer WMOD;
     ByteBuffer BLL;
-    uint8 ServerSeed[16];
+    uint8_t ServerSeed[16];
 };
 
 class WorldSession;
@@ -68,8 +68,8 @@ class Warden
         void HandleModuleData(WorldPacket &recvPacket);
         void HandleModuleHashRequest(WorldPacket &recvPacket);
 
-        static const std::vector<uint8> RSAPrivatePower;
-        static const std::vector<uint8> RSAPrivateModulus;
+        static const std::vector<uint8_t> RSAPrivatePower;
+        static const std::vector<uint8_t> RSAPrivateModulus;
 
     private:
         WorldSession* session_;

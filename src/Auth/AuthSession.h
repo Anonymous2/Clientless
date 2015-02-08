@@ -16,8 +16,7 @@
  */
 
 #pragma once
-
-#include "Define.h"
+#include "Common.h"
 #include "AuthResult.h"
 #include "AuthCmd.h"
 #include "Session.h"

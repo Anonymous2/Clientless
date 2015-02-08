@@ -18,8 +18,6 @@
  */
 
 #pragma once
-
-#include "Define.h"
 #include "Common.h"
 #include <openssl/evp.h>
 
@@ -31,15 +29,15 @@ class SHA1
         SHA1();
         ~SHA1();
 
-        void Update(const uint8* data, int32 len);
+        void Update(const uint8_t* data, int32_t len);
         void Update(const std::string &str);
         void Update(const BigNumber &bn);
         void Finalize();
 
-        uint8* GetDigest() { return digest_; };
-        uint32 GetDigestLength() { return digestLength_; };
+        uint8_t* GetDigest() { return digest_; };
+        uint32_t GetDigestLength() { return digestLength_; };
     private:
         EVP_MD_CTX ctx_;
-        uint8 digest_[EVP_MAX_MD_SIZE];
-        uint32 digestLength_;
+        uint8_t digest_[EVP_MAX_MD_SIZE];
+        uint32_t digestLength_;
 };

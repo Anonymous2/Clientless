@@ -23,7 +23,7 @@ void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
     recvPacket.ReadBits(23);
     recvPacket.ReadBit();
 
-    uint32 count = recvPacket.ReadBits(17);
+    uint32_t count = recvPacket.ReadBits(17);
 
     if (!count)
     {
@@ -42,13 +42,13 @@ void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
         player_ = Player(*character);
 
         WorldPacket packet(CMSG_LOAD_SCREEN, 5);
-        packet << uint32(player_.MapId);
+        packet << uint32_t(player_.MapId);
         packet.WriteBit(0x80);  // unk, from [4.3.4 15595 enUS]
         packet.FlushBits();
         SendPacket(packet);
 
         packet.Initialize(CMSG_VIOLENCE_LEVEL, 1);
-        packet << uint8(0x02);  // violenceLevel, from [4.3.4 15595 enUS]
+        packet << uint8_t(0x02);  // violenceLevel, from [4.3.4 15595 enUS]
         SendPacket(packet);
 
         packet.Initialize(CMSG_PLAYER_LOGIN, 8);

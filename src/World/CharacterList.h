@@ -16,8 +16,6 @@
  */
 
 #pragma once
-
-#include "Define.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Character.h"
@@ -25,7 +23,7 @@
 class CharacterList
 {
     public:
-        void Populate(uint32 count, WorldPacket &recvPacket);
+        void Populate(uint32_t count, WorldPacket &recvPacket);
         void Print() const;
  
         Character const* GetCharacterByName(std::string name) const;

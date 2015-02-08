@@ -31,13 +31,13 @@ BigNumber::BigNumber(BigNumber const& bn)
     : bn_(BN_dup(bn.bn_))
 { }
 
-BigNumber::BigNumber(uint32 val)
+BigNumber::BigNumber(uint32_t val)
     : bn_(BN_new())
 {
     BN_set_word(bn_, val);
 }
 
-BigNumber::BigNumber(uint8 const* buffer, int32 length)
+BigNumber::BigNumber(uint8_t const* buffer, int32_t length)
     : bn_(BN_new())
 {
     SetBinary(buffer, length);
@@ -58,21 +58,21 @@ void BigNumber::SetOne()
     BN_one(bn_);
 }
 
-void BigNumber::SetUInt32(uint32 value)
+void BigNumber::SetUInt32(uint32_t value)
 {
     BN_set_word(bn_, value);
 }
 
-void BigNumber::SetUInt64(uint64 value)
+void BigNumber::SetUInt64(uint64_t value)
 {
-    BN_add_word(bn_, (uint32)(value >> 32));
+    BN_add_word(bn_, (uint32_t)(value >> 32));
     BN_lshift(bn_, bn_, 32);
-    BN_add_word(bn_, (uint32)(value & 0xFFFFFFFF));
+    BN_add_word(bn_, (uint32_t)(value & 0xFFFFFFFF));
 }
 
-void BigNumber::SetBinary(uint8 const* bytes, int32 len)
+void BigNumber::SetBinary(uint8_t const* bytes, int32_t len)
 {
-    uint8* array = new uint8[len];
+    uint8_t* array = new uint8_t[len];
 
     for (int i = 0; i < len; i++)
         array[i] = bytes[len - 1 - i];
@@ -81,7 +81,7 @@ void BigNumber::SetBinary(uint8 const* bytes, int32 len)
 
     delete[] array;
 }
-void BigNumber::SetRandom(int32 length)
+void BigNumber::SetRandom(int32_t length)
 {
     BN_rand(bn_, length, 0, 1);
 }
@@ -214,14 +214,14 @@ BigNumber BigNumber::ModExp(BigNumber const& bn1, BigNumber const& bn2)
     return ret;
 }
 
-int32 BigNumber::GetNumBytes(void) const
+int32_t BigNumber::GetNumBytes(void) const
 {
     return BN_num_bytes(bn_);
 }
 
-uint32 BigNumber::AsDword()
+uint32_t BigNumber::AsDword()
 {
-    return (uint32)BN_get_word(bn_);
+    return (uint32_t)BN_get_word(bn_);
 }
 
 bool BigNumber::isZero() const
@@ -229,11 +229,11 @@ bool BigNumber::isZero() const
     return BN_is_zero(bn_);
 }
 
-std::unique_ptr<uint8[]> BigNumber::AsByteArray(int32 minSize, bool littleEndian) const
+std::unique_ptr<uint8_t[]> BigNumber::AsByteArray(int32_t minSize, bool littleEndian) const
 {
     int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
 
-    uint8* array = new uint8[length];
+    uint8_t* array = new uint8_t[length];
 
     // If we need more bytes than length of BigNumber set the rest to 0
     if (length > GetNumBytes())
@@ -245,7 +245,7 @@ std::unique_ptr<uint8[]> BigNumber::AsByteArray(int32 minSize, bool littleEndian
     if (littleEndian)
         std::reverse(array, array + length);
 
-    std::unique_ptr<uint8[]> ret(array);
+    std::unique_ptr<uint8_t[]> ret(array);
     return ret;
 }
 

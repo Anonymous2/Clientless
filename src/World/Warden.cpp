@@ -33,14 +33,14 @@ void Warden::Initialize(const BigNumber* key)
 void Warden::PreparePacket(WorldPacket &packet, WardenOpcodes opcode)
 {
     packet.Initialize(CMSG_WARDEN_DATA, 5);
-    packet << uint32(0);
-    packet << uint8(opcode);
+    packet << uint32_t(0);
+    packet << uint8_t(opcode);
 }
 
 void Warden::SendPacket(WorldPacket &packet)
 {
-    packet.put<uint32>(0, packet.size() - 4);
-    crypt_.Encrypt(const_cast<uint8*>(packet.contents() + 4), packet.size() - 4);
+    packet.put<uint32_t>(0, packet.size() - 4);
+    crypt_.Encrypt(const_cast<uint8_t*>(packet.contents() + 4), packet.size() - 4);
     session_->SendPacket(packet);
 }
 
@@ -69,7 +69,7 @@ bool Warden::VerifyModule()
     module_->BLL.resize(module_->WMOD.size() - 0x200 - 0x8);
     module_->WMOD.read(module_->BLL.contents(), module_->WMOD.size() - 0x200 - 0x8);
 
-    uint32 sign;
+    uint32_t sign;
     module_->WMOD >> sign;
 
     if (sign != 1397311310)
@@ -96,8 +96,8 @@ bool Warden::VerifyModule()
     signature = signature.ModExp(pow, mod);
 
     // Check the hashes
-    std::unique_ptr<uint8[]> blizzardHash = std::move(signature.AsByteArray());
-    uint8* ourHash = dataHash.GetDigest();
+    std::unique_ptr<uint8_t[]> blizzardHash = std::move(signature.AsByteArray());
+    uint8_t* ourHash = dataHash.GetDigest();
 
     for (int i = 0; i < 256 / 8; i++)
     {
@@ -119,7 +119,7 @@ void Warden::DecompressModule()
     stream.opaque = Z_NULL;
     inflateInit(&stream);
 
-    std::vector<uint8> decompressedBytes;
+    std::vector<uint8_t> decompressedBytes;
     decompressedBytes.resize(module_->DecompressedSize);
 
     stream.avail_in = module_->BLL.size() - 1;
@@ -138,7 +138,7 @@ void Warden::DecompressModule()
 
 void Warden::InitializeModule()
 {
-    uint32 header[4];
+    uint32_t header[4];
     module_->BLL >> header[0] >> header[1] >> header[2] >> header[3];
 
     if (header[0] != 843861058) // 'BLL2'
@@ -165,12 +165,12 @@ void Warden::HandleData(WorldPacket &recvPacket)
     if (!crypt_.IsInitialized())
         crypt_.Initialize(&session_->session_->GetKey());
 
-    uint32 size;
+    uint32_t size;
     recvPacket >> size;
 
-    crypt_.Decrypt(const_cast<uint8*>(recvPacket.contents() + 4), size);
+    crypt_.Decrypt(const_cast<uint8_t*>(recvPacket.contents() + 4), size);
 
-    uint8 opcode;
+    uint8_t opcode;
     recvPacket >> opcode;
 
     switch (opcode)
@@ -214,7 +214,7 @@ void Warden::HandleModuleInfo(WorldPacket &recvPacket)
 
 void Warden::HandleModuleData(WorldPacket &recvPacket)
 {
-    uint16 size;
+    uint16_t size;
     recvPacket >> size;
 
     module_->WMOD.append(recvPacket.contents() + recvPacket.rpos(), size);
@@ -244,11 +244,11 @@ void Warden::HandleModuleHashRequest(WorldPacket &recvPacket)
     recvPacket.read(module_->ServerSeed, 16);
 }
 
-const std::vector<uint8> Warden::RSAPrivatePower = {
+const std::vector<uint8_t> Warden::RSAPrivatePower = {
     0x01, 0x00, 0x01, 0x00
 };
 
-const std::vector<uint8> Warden::RSAPrivateModulus = {
+const std::vector<uint8_t> Warden::RSAPrivateModulus = {
     0x35, 0xdb, 0x85, 0x8e,
     0xc1, 0x40, 0x15, 0x1c,
     0xc4, 0x50, 0xbb, 0x04,

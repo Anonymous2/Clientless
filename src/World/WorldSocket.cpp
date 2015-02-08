@@ -113,11 +113,11 @@ void WorldSocket::RunSenderThread()
 
             ByteBuffer prepared;
 
-            uint16 size = htons(packet->size() + 4);
-            uint32 opcode = uint32(packet->GetOpcode());
+            uint16_t size = htons(packet->size() + 4);
+            uint32_t opcode = uint32_t(packet->GetOpcode());
 
-            packetCrypt_.EncryptSend((uint8*)&size, 2);
-            packetCrypt_.EncryptSend((uint8*)&opcode, 4);
+            packetCrypt_.EncryptSend((uint8_t*)&size, 2);
+            packetCrypt_.EncryptSend((uint8_t*)&opcode, 4);
 
             prepared << size;
             prepared << opcode;
@@ -137,8 +137,8 @@ void WorldSocket::RunSenderThread()
 
 void WorldSocket::RunReceiverThread()
 {
-    uint8 header[5];
-    uint32 size;
+    uint8_t header[5];
+    uint32_t size;
     Opcodes opcode;
 
     while (IsConnected())
@@ -201,15 +201,15 @@ void WorldSocket::DecompressPacket(std::shared_ptr<WorldPacket> packet)
     // Calculate real header
     Opcodes opcode = static_cast<Opcodes>(packet->GetOpcode() ^ COMPRESSED_OPCODE_MASK);
 
-    uint32 size;
+    uint32_t size;
     (*packet) >> size;
 
     // Decompress packet
-    std::vector<uint8> decompressedBytes;
+    std::vector<uint8_t> decompressedBytes;
     decompressedBytes.resize(size);
 
     inflateStream_.avail_in = packet->size() - packet->rpos();
-    inflateStream_.next_in = const_cast<uint8*>(packet->contents() + packet->rpos());
+    inflateStream_.next_in = const_cast<uint8_t*>(packet->contents() + packet->rpos());
     inflateStream_.avail_out = size;
     inflateStream_.next_out = &decompressedBytes[0];
 

@@ -109,9 +109,9 @@ bool TCPSocket::IsConnected()
     return socket_ != INVALID_SOCKET;
 }
 
-int32 TCPSocket::Read(char* buffer, uint32 length)
+int32_t TCPSocket::Read(char* buffer, uint32_t length)
 {
-    int32 result = recv(socket_, buffer, length, MSG_WAITALL);
+    int32_t result = recv(socket_, buffer, length, MSG_WAITALL);
 
     if (!result)
     {
@@ -130,20 +130,20 @@ int32 TCPSocket::Read(char* buffer, uint32 length)
     return result;
 }
 
-int32 TCPSocket::Read(ByteBuffer* buffer, uint32 length)
+int32_t TCPSocket::Read(ByteBuffer* buffer, uint32_t length)
 {
     char* tmp = new char[length];
 
-    int32 result = Read(tmp, length);
+    int32_t result = Read(tmp, length);
     buffer->append(tmp, length);
 
     delete[] tmp;
     return result;
 }
 
-int32 TCPSocket::Send(uint8 const* buffer, uint32 length)
+int32_t TCPSocket::Send(uint8_t const* buffer, uint32_t length)
 {
-    int32 result = send(socket_, reinterpret_cast<char const*>(buffer), length, 0);
+    int32_t result = send(socket_, reinterpret_cast<char const*>(buffer), length, 0);
 
     if (!result)
     {

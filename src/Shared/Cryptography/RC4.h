@@ -18,19 +18,18 @@
  */
 
 #pragma once
-
-#include "Define.h"
+#include <cstdint>
 #include <openssl/evp.h>
 
 class RC4
 {
     public:
-        RC4(int32 len);
-        RC4(uint8* seed, int32 len);
+        RC4(int32_t len);
+        RC4(uint8_t* seed, int32_t len);
         ~RC4();
 
-        void Initialize(uint8* seed);
-        void Update(uint8* data, int32 len);
+        void Initialize(uint8_t* seed);
+        void Update(uint8_t* data, int32_t len);
     private:
         EVP_CIPHER_CTX ctx_;
 };

@@ -22,8 +22,7 @@ for cross platform where they have different endians.
 */
 
 #pragma once
-
-#include "Define.h"
+#include <cstdint>
 #include <algorithm>
 
 namespace ByteConverter
@@ -89,7 +88,7 @@ template<typename T> inline void EndianConvertPtrReverse(void* val)
 template<typename T> void EndianConvert(T*); // will generate link error
 template<typename T> void EndianConvertReverse(T*); // will generate link error
 
-inline void EndianConvert(uint8&) { }
-inline void EndianConvert(int8&) { }
-inline void EndianConvertReverse(uint8&) { }
-inline void EndianConvertReverse(int8&) { }
+inline void EndianConvert(uint8_t&) { }
+inline void EndianConvert(int8_t&) { }
+inline void EndianConvertReverse(uint8_t&) { }
+inline void EndianConvertReverse(int8_t&) { }

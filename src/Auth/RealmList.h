@@ -16,12 +16,11 @@
  */
 
 #pragma once
-
-#include "Define.h"
+#include "Common.h"
 #include "Network/ByteBuffer.h"
 #include <vector>
  
-enum RealmFlags : uint8
+enum RealmFlags : uint8_t
 {
     REALM_FLAG_NONE                              = 0x00,
     REALM_FLAG_INVALID                           = 0x01,
@@ -36,25 +35,25 @@ enum RealmFlags : uint8
  
 struct Realm
 {
-    uint8 Icon;
+    uint8_t Icon;
     bool Lock;
     RealmFlags Flags;
     std::string Name;
     std::string Address;
     float Population;
-    uint8 Characters;
-    uint8 Timezone;
-    uint8 ID;
-    uint8 MajorVersion;
-    uint8 MinorVersion;
-    uint8 BugfixVersion;
-    uint16 Build;
+    uint8_t Characters;
+    uint8_t Timezone;
+    uint8_t ID;
+    uint8_t MajorVersion;
+    uint8_t MinorVersion;
+    uint8_t BugfixVersion;
+    uint16_t Build;
 };
  
 class RealmList
 {
     public:
-        void Populate(uint32 count, ByteBuffer &buffer);
+        void Populate(uint32_t count, ByteBuffer &buffer);
         void Print();
 
         Realm const* GetRealmByName(std::string name);

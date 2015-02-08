@@ -30,7 +30,7 @@ struct WorldOpcodeHandler
 
 WorldSession::WorldSession(std::shared_ptr<Session> session) : session_(session), socket_(this), serverSeed_(0), warden_(this), lastPingTime_(0), ping_(0)
 {
-    clientSeed_ = static_cast<uint32>(time(nullptr));
+    clientSeed_ = static_cast<uint32_t>(time(nullptr));
 }
 
 WorldSession::~WorldSession()

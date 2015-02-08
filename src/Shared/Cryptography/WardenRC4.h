@@ -18,8 +18,7 @@
  */
 
 #pragma once
-
-#include "Define.h"
+#include <cstdint>
 #include "RC4.h"
 #include "BigNumber.h"
 
@@ -32,16 +31,16 @@ class WardenRC4
         void Initialize(const BigNumber* key);
         bool IsInitialized();
         
-        void Encrypt(uint8* data, uint32 size);
-        void Decrypt(uint8* data, uint32 size);
+        void Encrypt(uint8_t* data, uint32_t size);
+        void Decrypt(uint8_t* data, uint32_t size);
 
     private:
         bool ready_;
-        uint32 taken_;
-        uint8 buffer_[3][20];
+        uint32_t taken_;
+        uint8_t buffer_[3][20];
         RC4 encryptionStream_;
         RC4 decryptionStream_;
 
         void FillUp();
-        void Generate(uint8* buffer, uint32 size);
+        void Generate(uint8_t* buffer, uint32_t size);
 };

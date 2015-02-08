@@ -33,7 +33,7 @@ PacketRC4::~PacketRC4()
 void PacketRC4::Initialize(const BigNumber* key)
 {
     // Decryption
-    uint8 decryptKey[16] = { 0xCC, 0x98, 0xAE, 0x04, 0xE8, 0x97, 0xEA, 0xCA, 0x12, 0xDD, 0xC0, 0x93, 0x42, 0x91, 0x53, 0x57 };
+    uint8_t decryptKey[16] = { 0xCC, 0x98, 0xAE, 0x04, 0xE8, 0x97, 0xEA, 0xCA, 0x12, 0xDD, 0xC0, 0x93, 0x42, 0x91, 0x53, 0x57 };
 
     HMACSHA1 decryptHMAC(decryptKey, 16);
     decryptHMAC.Update(*key);
@@ -42,7 +42,7 @@ void PacketRC4::Initialize(const BigNumber* key)
     decrypt_.Initialize(decryptHMAC.GetDigest());
 
     // Encryption
-    uint8 encryptKey[16] = { 0xC2, 0xB3, 0x72, 0x3C, 0xC6, 0xAE, 0xD9, 0xB5, 0x34, 0x3C, 0x53, 0xEE, 0x2F, 0x43, 0x67, 0xCE };
+    uint8_t encryptKey[16] = { 0xC2, 0xB3, 0x72, 0x3C, 0xC6, 0xAE, 0xD9, 0xB5, 0x34, 0x3C, 0x53, 0xEE, 0x2F, 0x43, 0x67, 0xCE };
 
     HMACSHA1 encryptHMAC(encryptKey, 16);
     encryptHMAC.Update(*key);
@@ -51,7 +51,7 @@ void PacketRC4::Initialize(const BigNumber* key)
     encrypt_.Initialize(encryptHMAC.GetDigest());
 
     // Drop-N
-    uint8 drop[1024];
+    uint8_t drop[1024];
     memset(drop, 0, 1024);
 
     encrypt_.Update(drop, 1024);
@@ -65,7 +65,7 @@ void PacketRC4::Reset()
     ready_ = false;
 }
 
-void PacketRC4::DecryptReceived(uint8* data, int32 len)
+void PacketRC4::DecryptReceived(uint8_t* data, int32_t len)
 {
     if (!ready_)
         return;
@@ -73,7 +73,7 @@ void PacketRC4::DecryptReceived(uint8* data, int32 len)
     decrypt_.Update(data, len);
 }
 
-void PacketRC4::EncryptSend(uint8* data, int32 len)
+void PacketRC4::EncryptSend(uint8_t* data, int32_t len)
 {
     if (!ready_)
         return;

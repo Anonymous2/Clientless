@@ -16,8 +16,6 @@
  */
 
 #pragma once
-
-#include "Define.h"
 #include "Common.h"
 #include "Cryptography/BigNumber.h"
 #include "Cryptography/SHA1.h"
@@ -30,12 +28,12 @@ class SRP6
 
         void Reset();
         void SetCredentials(std::string name, std::string password);
-        void SetServerModulus(uint8* buffer, uint32 length);
-        void SetServerGenerator(uint8* buffer, uint32 length);
-        void SetServerEphemeralB(uint8* buffer, uint32 length);
-        void SetServerSalt(uint8* buffer, uint32 length);
+        void SetServerModulus(uint8_t* buffer, uint32_t length);
+        void SetServerGenerator(uint8_t* buffer, uint32_t length);
+        void SetServerEphemeralB(uint8_t* buffer, uint32_t length);
+        void SetServerSalt(uint8_t* buffer, uint32_t length);
         void Calculate();
-        bool IsValidM2(uint8* buffer, uint32 length);
+        bool IsValidM2(uint8_t* buffer, uint32_t length);
 
         BigNumber* GetClientEphemeralA() { return &A; }
         BigNumber* GetClientM1() { return &M1; }
