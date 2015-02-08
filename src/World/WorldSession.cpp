@@ -28,7 +28,7 @@ struct WorldOpcodeHandler
     std::function<void(WorldPacket&)> callback;
 };
 
-WorldSession::WorldSession(std::shared_ptr<Session> session) : session_(session), socket_(this), serverSeed_(0), ping_(0), lastPingTime_(0)
+WorldSession::WorldSession(std::shared_ptr<Session> session) : session_(session), socket_(this), serverSeed_(0), warden_(this), lastPingTime_(0), ping_(0)
 {
     clientSeed_ = static_cast<uint32>(time(nullptr));
 }
@@ -53,7 +53,10 @@ const std::vector<WorldOpcodeHandler> WorldSession::GetOpcodeHandlers()
         // MiscHandler.cpp
         BIND_OPCODE_HANDLER(SMSG_MOTD, HandleMOTD),
         BIND_OPCODE_HANDLER(SMSG_PONG, HandlePong),
-        BIND_OPCODE_HANDLER(SMSG_TIME_SYNC_REQ, HandleTimeSyncRequest)
+        BIND_OPCODE_HANDLER(SMSG_TIME_SYNC_REQ, HandleTimeSyncRequest),
+
+        // WardenHandler.cpp
+        BIND_OPCODE_HANDLER(SMSG_WARDEN_DATA, HandleWardenData)
     };
 }
 
@@ -97,7 +100,20 @@ void WorldSession::Enter()
         packetProcessEvent->SetEnabled(true);
         packetProcessEvent->SetCallback([this]() {
             while (std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket())
-                std::async(&WorldSession::HandlePacket, this, packet);
+            {
+                switch (packet->GetOpcode())
+                {
+                    case MSG_VERIFY_CONNECTIVITY:
+                    case SMSG_AUTH_CHALLENGE:
+                    case SMSG_AUTH_RESPONSE:
+                    case SMSG_WARDEN_DATA:
+                        HandlePacket(packet);
+                        break;
+                    default:
+                        std::async(&WorldSession::HandlePacket, this, packet);
+                        break;
+                }
+            }
         });
 
         eventMgr_.AddEvent(packetProcessEvent);

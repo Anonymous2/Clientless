@@ -1,0 +1,380 @@
+/*
+ * Copyright (C) 2015 Dehravor <dehravor@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "Warden.h"
+#include "WorldSession.h"
+#include "Cryptography/SHA256.h"
+#include "Cryptography/RC4.h"
+#include <zlib/zlib.h>
+
+Warden::Warden(WorldSession* session) : session_(session), module_(nullptr)
+{
+}
+
+void Warden::Initialize(const BigNumber* key)
+{
+    crypt_.Initialize(key);
+}
+
+void Warden::PreparePacket(WorldPacket &packet, WardenOpcodes opcode)
+{
+    packet.Initialize(CMSG_WARDEN_DATA, 5);
+    packet << uint32(0);
+    packet << uint8(opcode);
+}
+
+void Warden::SendPacket(WorldPacket &packet)
+{
+    packet.put<uint32>(0, packet.size() - 4);
+    crypt_.Encrypt(const_cast<uint8*>(packet.contents() + 4), packet.size() - 4);
+    session_->SendPacket(packet);
+}
+
+bool Warden::VerifyModule()
+{
+    // Generate SHA-256 hash of module
+    SHA256 hash;
+    hash.Update(module_->WMOD.contents(), module_->WMOD.size());
+    hash.Finalize();
+
+    // Check SHA-256 hash of module
+    if (memcmp(module_->Hash, hash.GetDigest(), 256 / 8))
+    {
+        error("%s", "[WARDEN]: Module is corrupted! (SHA-256)");
+        return false;
+    }
+
+    // Decrypt module (RC4)
+    RC4 stream(16);
+    stream.Initialize(module_->DecryptionKey);
+    stream.Update(module_->WMOD.contents(), module_->WMOD.size());
+
+    // Process module
+    module_->WMOD >> module_->DecompressedSize;
+
+    module_->BLL.resize(module_->WMOD.size() - 0x200 - 0x8);
+    module_->WMOD.read(module_->BLL.contents(), module_->WMOD.size() - 0x200 - 0x8);
+
+    uint32 sign;
+    module_->WMOD >> sign;
+
+    if (sign != 1397311310)
+    {
+        error("%s", "[WARDEN]: Module is corrupted! (SIGN)");
+        return false;
+    }
+    
+    // Generate SHA-256 hash of data
+    SHA256 dataHash;
+    dataHash.Update(module_->WMOD.contents(), module_->WMOD.size() - 0x200 - 0x04);
+    dataHash.Update("MAIEV.MOD");
+    dataHash.Finalize();
+
+    // Decrypt RSA-512 signature
+    ByteBuffer signatureRaw;
+    signatureRaw.resize(0x200);
+    module_->WMOD.read(signatureRaw.contents(), 0x200);
+
+    BigNumber mod(&Warden::RSAPrivateModulus[0], Warden::RSAPrivateModulus.size());
+    BigNumber pow(&Warden::RSAPrivatePower[0], Warden::RSAPrivatePower.size());
+
+    BigNumber signature(signatureRaw.contents(), signatureRaw.size());
+    signature = signature.ModExp(pow, mod);
+
+    // Check the hashes
+    std::unique_ptr<uint8[]> blizzardHash = std::move(signature.AsByteArray());
+    uint8* ourHash = dataHash.GetDigest();
+
+    for (int i = 0; i < 256 / 8; i++)
+    {
+        if (blizzardHash.get()[i] != ourHash[31 - i])
+        {
+            error("%s", "[WARDEN]: Module is corrupted! (RSA-512)");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void Warden::DecompressModule()
+{
+    z_stream_s stream;
+    stream.zalloc = Z_NULL;
+    stream.zfree = Z_NULL;
+    stream.opaque = Z_NULL;
+    inflateInit(&stream);
+
+    std::vector<uint8> decompressedBytes;
+    decompressedBytes.resize(module_->DecompressedSize);
+
+    stream.avail_in = module_->BLL.size() - 1;
+    stream.next_in = module_->BLL.contents();
+    stream.avail_out = module_->DecompressedSize;
+    stream.next_out = &decompressedBytes[0];
+
+    assert(inflate(&stream, Z_NO_FLUSH) == Z_OK);
+    assert(stream.avail_in == 0);
+
+    inflateEnd(&stream);
+
+    module_->BLL.clear();
+    module_->BLL.append(&decompressedBytes[0], module_->DecompressedSize);
+}
+
+void Warden::InitializeModule()
+{
+    uint32 header[4];
+    module_->BLL >> header[0] >> header[1] >> header[2] >> header[3];
+
+    if (header[0] != 843861058) // 'BLL2'
+    {
+        error("%s", "[Warden]: Invalid module header!");
+        return;
+    }
+
+    if (header[1] != 2) // BLL version
+    {
+        error("%s", "[Warden]: Invalid module header!");
+        return;
+    }
+
+    if (header[2] != 332)
+    {
+        error("%s", "[Warden]: Invalid module header!");
+        return;
+    }
+}
+
+void Warden::HandleData(WorldPacket &recvPacket)
+{
+    if (!crypt_.IsInitialized())
+        crypt_.Initialize(&session_->session_->GetKey());
+
+    uint32 size;
+    recvPacket >> size;
+
+    crypt_.Decrypt(const_cast<uint8*>(recvPacket.contents() + 4), size);
+
+    uint8 opcode;
+    recvPacket >> opcode;
+
+    switch (opcode)
+    {
+        case WARDEN_SMSG_MODULE_USE:
+            HandleModuleInfo(recvPacket);
+            break;
+        case WARDEN_SMSG_MODULE_CACHE:
+            HandleModuleData(recvPacket);
+            break;
+        case WARDEN_SMSG_CHEAT_CHECKS_REQUEST:
+            break;
+        case WARDEN_SMSG_MODULE_INITIALIZE:
+            break;
+        case WARDEN_SMSG_MEM_CHECKS_REQUEST:
+            break;
+        case WARDEN_SMSG_HASH_REQUEST:
+            HandleModuleHashRequest(recvPacket);
+            break;
+        default:
+            assert(false);
+            break;
+    }
+}
+
+void Warden::HandleModuleInfo(WorldPacket &recvPacket)
+{
+    module_.reset(new WardenModule());
+
+    recvPacket.read(&module_->Hash[0], 32);
+    recvPacket.read(&module_->DecryptionKey[0], 16);
+    recvPacket >> module_->Size;
+
+    module_->WMOD.clear();
+
+    // We don't cache the module data, so request it always
+    WorldPacket packet;
+    PreparePacket(packet, WARDEN_CMSG_MODULE_MISSING);
+    SendPacket(packet);
+}
+
+void Warden::HandleModuleData(WorldPacket &recvPacket)
+{
+    uint16 size;
+    recvPacket >> size;
+
+    module_->WMOD.append(recvPacket.contents() + recvPacket.rpos(), size);
+
+    if (module_->WMOD.size() == module_->Size)
+    {
+        if (VerifyModule())
+        {
+            DecompressModule();
+            InitializeModule();
+
+            WorldPacket packet;
+            PreparePacket(packet, WARDEN_CMSG_MODULE_OK);
+            SendPacket(packet);
+        }
+        else
+        {
+            WorldPacket packet;
+            PreparePacket(packet, WARDEN_CMSG_MODULE_FAILED);
+            SendPacket(packet);
+        }
+    }
+}
+
+void Warden::HandleModuleHashRequest(WorldPacket &recvPacket)
+{
+    recvPacket.read(module_->ServerSeed, 16);
+}
+
+const std::vector<uint8> Warden::RSAPrivatePower = {
+    0x01, 0x00, 0x01, 0x00
+};
+
+const std::vector<uint8> Warden::RSAPrivateModulus = {
+    0x35, 0xdb, 0x85, 0x8e,
+    0xc1, 0x40, 0x15, 0x1c,
+    0xc4, 0x50, 0xbb, 0x04,
+    0xc2, 0x8b, 0xc2, 0xf2,
+    0x24, 0xfd, 0xcc, 0x5b,
+    0xf6, 0x7c, 0x63, 0x05,
+    0x0c, 0xd4, 0xcc, 0xfd,
+    0xe6, 0x47, 0x51, 0xe2,
+    0x81, 0x21, 0x2b, 0x43,
+    0x66, 0x14, 0x20, 0xbc,
+    0xf7, 0x94, 0x55, 0x1b,
+    0xe0, 0xf6, 0x11, 0xaa,
+    0xee, 0x8b, 0xc2, 0x40,
+    0x4d, 0xb6, 0xa5, 0xad,
+    0x62, 0x5d, 0x28, 0xa6,
+    0x63, 0x9d, 0x80, 0x30,
+    0x36, 0x6c, 0x4d, 0xe4,
+    0x48, 0xab, 0x24, 0x11,
+    0xba, 0x75, 0x5d, 0x49,
+    0xa2, 0xdb, 0x8f, 0xc7,
+    0x43, 0x13, 0x7c, 0xef,
+    0xbe, 0x2c, 0x58, 0x33,
+    0xc6, 0x2a, 0xbf, 0x3e,
+    0xe6, 0x23, 0xdd, 0x8a,
+    0xde, 0x94, 0x50, 0x23,
+    0x2a, 0xe2, 0x7f, 0x61,
+    0x55, 0xaa, 0x74, 0xb9,
+    0x70, 0x5b, 0xdb, 0xc6,
+    0xd2, 0x1a, 0xc0, 0x5e,
+    0xf4, 0x4a, 0xf2, 0x36,
+    0x74, 0xe8, 0x31, 0x9d,
+    0x1c, 0x23, 0x7c, 0x33,
+    0x76, 0x1d, 0xaa, 0x14,
+    0x63, 0xa3, 0x40, 0x3b,
+    0x67, 0xf7, 0xf4, 0xed,
+    0x7a, 0x38, 0x90, 0x1d,
+    0x69, 0xd7, 0xbb, 0x3e,
+    0x30, 0x63, 0x6c, 0x73,
+    0x22, 0x27, 0xff, 0xf3,
+    0x03, 0xa6, 0x90, 0xf1,
+    0xc8, 0x04, 0xde, 0xb7,
+    0x74, 0x0b, 0xe2, 0x62,
+    0x20, 0xad, 0x2f, 0x14,
+    0x6e, 0x78, 0x14, 0xf1,
+    0x50, 0xfa, 0x70, 0x00,
+    0xdd, 0xbe, 0xc7, 0xe5,
+    0x63, 0xcc, 0x77, 0x96,
+    0x69, 0xbf, 0x28, 0xe3,
+    0x76, 0xd4, 0xcb, 0xc8,
+    0x99, 0x79, 0x6e, 0xfa,
+    0xe7, 0x9e, 0x38, 0x7a,
+    0xb5, 0xf8, 0x50, 0x53,
+    0xa3, 0xa4, 0x36, 0x1d,
+    0x0f, 0xc9, 0x8a, 0xf3,
+    0x4c, 0x67, 0x42, 0xd8,
+    0x01, 0xb8, 0xaf, 0x43,
+    0x05, 0xda, 0x42, 0x44,
+    0xab, 0xfc, 0x9b, 0x38,
+    0xe6, 0x0c, 0xda, 0x91,
+    0xe4, 0xf0, 0x2d, 0xef,
+    0x63, 0x71, 0xcb, 0xe6,
+    0x6e, 0x3e, 0xa3, 0xd7,
+    0xef, 0x09, 0xd7, 0xae,
+    0x65, 0xa4, 0x3c, 0x8a,
+    0xd4, 0xd4, 0x24, 0x5b,
+    0x1b, 0x90, 0xf1, 0x60,
+    0x75, 0xa4, 0x7f, 0xef,
+    0x0b, 0x3a, 0xcc, 0xe3,
+    0x17, 0x99, 0xcb, 0x70,
+    0x95, 0x75, 0x9a, 0x10,
+    0xc8, 0x0a, 0x4c, 0x5f,
+    0xf0, 0x54, 0xcd, 0x67,
+    0x55, 0xb2, 0x20, 0xcc,
+    0xa9, 0x44, 0xb7, 0x1b,
+    0xc0, 0xa9, 0x71, 0x00,
+    0x15, 0x28, 0x5e, 0x2e,
+    0x8d, 0x7c, 0xfd, 0x7c,
+    0xec, 0x7a, 0x06, 0xdc,
+    0xb4, 0xaf, 0xca, 0x95,
+    0xee, 0xc1, 0xfa, 0xbb,
+    0x7d, 0xa9, 0x0a, 0x9b,
+    0xd1, 0xbc, 0x59, 0x51,
+    0x9f, 0xe1, 0x6f, 0xef,
+    0xa4, 0x3d, 0x0f, 0x7b,
+    0xcc, 0xa1, 0x30, 0x79,
+    0x29, 0xec, 0xfb, 0xeb,
+    0x91, 0x92, 0xdf, 0x2a,
+    0x70, 0xc9, 0x7f, 0xba,
+    0xc1, 0x8e, 0x19, 0xae,
+    0xfe, 0xe5, 0xf4, 0x4f,
+    0xb4, 0x63, 0xf8, 0x50,
+    0x38, 0xcd, 0x44, 0x4e,
+    0x74, 0xab, 0xd9, 0xfa,
+    0xbd, 0x89, 0xf6, 0xed,
+    0x38, 0xbd, 0x0f, 0x9f,
+    0x01, 0xa7, 0x2e, 0x37,
+    0xc7, 0x6f, 0x6d, 0x67,
+    0xd1, 0x96, 0xd0, 0xb5,
+    0x8e, 0x91, 0xac, 0x4a,
+    0x0a, 0xb3, 0x8d, 0xec,
+    0xa6, 0xfa, 0xc9, 0xab,
+    0xad, 0x62, 0xaa, 0x59,
+    0x4d, 0xfa, 0xa8, 0x61,
+    0x4c, 0xe2, 0x8b, 0x3f,
+    0xe7, 0x64, 0x30, 0x20,
+    0xfb, 0x7c, 0x82, 0x0c,
+    0xb8, 0x20, 0x4a, 0x21,
+    0xdd, 0xf7, 0x37, 0xe7,
+    0xb7, 0xd1, 0xe2, 0x1c,
+    0x64, 0x44, 0x3d, 0x98,
+    0xb8, 0x4a, 0x66, 0x55,
+    0xa4, 0x72, 0xbd, 0xd9,
+    0xd9, 0xbc, 0x38, 0x6b,
+    0xcb, 0x2d, 0x09, 0xa8,
+    0xcd, 0xd5, 0x8f, 0xfe,
+    0x4b, 0xc2, 0x6c, 0x72,
+    0x65, 0xaa, 0x2f, 0x43,
+    0xf0, 0xe3, 0x43, 0x4a,
+    0x10, 0x6d, 0x78, 0x32,
+    0x1f, 0xa4, 0x19, 0x95,
+    0x32, 0x8d, 0x4c, 0x21,
+    0x4b, 0xa8, 0x28, 0x3e,
+    0xb4, 0x94, 0xf8, 0x9a,
+    0xc4, 0x49, 0x06, 0x0d,
+    0x90, 0x09, 0x4d, 0xf8,
+    0xdf, 0x2a, 0x86, 0x2d,
+    0x69, 0x49, 0x9b, 0x5b,
+    0x02, 0xd7, 0xef, 0xba
+};

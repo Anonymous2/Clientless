@@ -26,6 +26,7 @@
 #include "ObjectGuid.h"
 #include "EventMgr.h"
 #include "WorldSocket.h"
+#include "Warden.h"
 #include <queue>
 
 struct WorldOpcodeHandler;
@@ -33,6 +34,7 @@ struct WorldOpcodeHandler;
 class WorldSession
 {
     friend class WorldSocket;
+    friend class Warden;
 
     public:
         WorldSession(std::shared_ptr<Session> session);
@@ -50,6 +52,7 @@ class WorldSession
         WorldSocket socket_;
         EventMgr eventMgr_;
         Player player_;
+        Warden warden_;
 
         uint64 lastPingTime_;
         uint32 ping_;
@@ -74,4 +77,8 @@ class WorldSession
         void HandlePong(WorldPacket &recvPacket);
         void SendPing();
         void HandleTimeSyncRequest(WorldPacket &recvPacket);
+
+    // WardenHandler.cpp
+    private:
+        void HandleWardenData(WorldPacket &recvPacket);
 };
