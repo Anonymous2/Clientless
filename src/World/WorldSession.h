@@ -26,6 +26,7 @@
 #include "EventMgr.h"
 #include "WorldSocket.h"
 #include "Warden.h"
+#include "Cache.h"
 #include <queue>
 
 struct WorldOpcodeHandler;
@@ -52,6 +53,7 @@ class WorldSession
         EventMgr eventMgr_;
         Player player_;
         Warden warden_;
+        Cache<PlayerNameEntry> playerNames_;
 
         uint64_t lastPingTime_;
         uint32_t ping_;
@@ -76,6 +78,11 @@ class WorldSession
         void HandlePong(WorldPacket &recvPacket);
         void SendPing();
         void HandleTimeSyncRequest(WorldPacket &recvPacket);
+
+    // QueryHandler.cpp
+    private:
+        void SendNameQuery(ObjectGuid guid);
+        void HandleNameQueryResponse(WorldPacket &recvPacket);
 
     // WardenHandler.cpp
     private:

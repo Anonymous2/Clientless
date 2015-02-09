@@ -58,3 +58,28 @@ std::string ObjectGuid::ToString() const
     str << " Low: " << GetCounter();
     return str.str();
 }
+
+ByteBuffer& operator<<(ByteBuffer& buf, ObjectGuid const& guid)
+{
+    buf << uint64_t(guid.GetRawValue());
+    return buf;
+}
+
+
+ByteBuffer& operator>>(ByteBuffer& buf, ObjectGuid& guid)
+{
+    guid.Set(buf.read<uint64_t>());
+    return buf;
+}
+
+ByteBuffer& operator<<(ByteBuffer& buf, PackedGuid const& guid)
+{
+    buf.append(guid._packedGuid);
+    return buf;
+}
+
+ByteBuffer& operator>>(ByteBuffer& buf, PackedGuidReader const& guid)
+{
+    buf.readPackGUID(*reinterpret_cast<uint64_t*>(guid.GuidPtr));
+    return buf;
+}

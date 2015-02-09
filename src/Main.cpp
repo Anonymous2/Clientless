@@ -23,7 +23,7 @@
 int main(int argc, char* argv[])
 {
     std::cout << "[Clientless World of Warcraft]" << std::endl;
-    std::cout << " - Version: " << uint32_t(GameVersion[0]) << "." << uint32_t(GameVersion[1]) << " . " << uint32_t(GameVersion[2]) << " (" << GameBuild << ")" << std::endl;
+    std::cout << " - Version: " << uint32_t(GameVersion[0]) << "." << uint32_t(GameVersion[1]) << "." << uint32_t(GameVersion[2]) << " (" << GameBuild << ")" << std::endl;
     std::cout << " - OS: " << OS << " Platform: " << Platform << " Locale: " << Locale[0] << Locale[1] << Locale[2] << Locale[3] << std::endl;
 
     std::shared_ptr<Session> session(new Session());

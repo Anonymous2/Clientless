@@ -21,6 +21,7 @@
 #define ObjectGuid_h__
 
 #include "Common.h"
+#include "WorldPacket.h"
 #include <cstdint>
 #include <functional>
 #include <cassert>
@@ -89,7 +90,7 @@ class ObjectGuid
         static ObjectGuid const Empty;
 
         ObjectGuid() { _data._guid = 0; }
-        explicit ObjectGuid(uint64_t guid)  { _data._guid = guid; }
+        ObjectGuid(uint64_t guid)  { _data._guid = guid; }
         ObjectGuid(HighGuid hi, uint32_t entry, uint32_t counter) { _data._guid = counter ? uint64_t(counter) | (uint64_t(entry) << 32) | (uint64_t(hi) << ((hi == HIGHGUID_CORPSE || hi == HIGHGUID_AREATRIGGER) ? 48 : 52)) : 0; }
         ObjectGuid(HighGuid hi, uint32_t counter) { _data._guid = counter ? uint64_t(counter) | (uint64_t(hi) << ((hi == HIGHGUID_CORPSE || hi == HIGHGUID_AREATRIGGER) ? 48 : 52)) : 0; }
 
@@ -224,5 +225,34 @@ class ObjectGuid
             uint8_t _bytes[sizeof(uint64_t)];
         } _data;
 };
+
+// minimum buffer size for packed guid is 9 bytes
+#define PACKED_GUID_MIN_BUFFER_SIZE 9
+
+class PackedGuid
+{
+        friend ByteBuffer& operator<<(ByteBuffer& buf, PackedGuid const& guid);
+
+    public:
+        explicit PackedGuid() : _packedGuid(PACKED_GUID_MIN_BUFFER_SIZE) { _packedGuid.appendPackGUID(0); }
+        explicit PackedGuid(uint64_t guid) : _packedGuid(PACKED_GUID_MIN_BUFFER_SIZE) { _packedGuid.appendPackGUID(guid); }
+        explicit PackedGuid(ObjectGuid guid) : _packedGuid(PACKED_GUID_MIN_BUFFER_SIZE) { _packedGuid.appendPackGUID(guid.GetRawValue()); }
+
+        void Set(uint64_t guid) { _packedGuid.wpos(0); _packedGuid.appendPackGUID(guid); }
+        void Set(ObjectGuid guid) { _packedGuid.wpos(0); _packedGuid.appendPackGUID(guid.GetRawValue()); }
+
+        size_t size() const { return _packedGuid.size(); }
+
+    private:
+        ByteBuffer _packedGuid;
+};
+
+ByteBuffer& operator<<(ByteBuffer& buf, ObjectGuid const& guid);
+ByteBuffer& operator>>(ByteBuffer& buf, ObjectGuid&       guid);
+
+ByteBuffer& operator<<(ByteBuffer& buf, PackedGuid const& guid);
+ByteBuffer& operator>>(ByteBuffer& buf, PackedGuidReader const& guid);
+
+inline PackedGuid ObjectGuid::WriteAsPacked() const { return PackedGuid(*this); }
 
 #endif // ObjectGuid_h__

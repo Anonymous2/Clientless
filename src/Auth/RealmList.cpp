@@ -64,7 +64,7 @@ void RealmList::Print()
                 continue;
         }
 
-        std::cout << " - " << realm.Name << "[" << realm.Address << "] (" << (realm.Flags & REALM_FLAG_OFFLINE ? "Offline" : "Online") << ")" << std::endl;
+        std::cout << " - " << realm.Name << " [" << realm.Address << "] (" << (realm.Flags & REALM_FLAG_OFFLINE ? "Offline" : "Online") << ")" << std::endl;
     }
 }
 

@@ -20,6 +20,7 @@
 #include <limits>
 #include <iostream>
 #include <future>
+#include <sstream>
 #include "EventMgr.h"
 
 struct WorldOpcodeHandler
@@ -28,13 +29,17 @@ struct WorldOpcodeHandler
     std::function<void(WorldPacket&)> callback;
 };
 
-WorldSession::WorldSession(std::shared_ptr<Session> session) : session_(session), socket_(this), serverSeed_(0), warden_(this), lastPingTime_(0), ping_(0)
+WorldSession::WorldSession(std::shared_ptr<Session> session)
+    : session_(session), socket_(this), serverSeed_(0), warden_(this),
+    playerNames_("cache_players.dat"), lastPingTime_(0), ping_(0)
 {
     clientSeed_ = static_cast<uint32_t>(time(nullptr));
+    playerNames_.Load();
 }
 
 WorldSession::~WorldSession()
 {
+    playerNames_.Save();
 }
 
 #define BIND_OPCODE_HANDLER(a, b) { a, std::bind(&WorldSession::b, this, std::placeholders::_1) }
@@ -54,6 +59,9 @@ const std::vector<WorldOpcodeHandler> WorldSession::GetOpcodeHandlers()
         BIND_OPCODE_HANDLER(SMSG_MOTD, HandleMOTD),
         BIND_OPCODE_HANDLER(SMSG_PONG, HandlePong),
         BIND_OPCODE_HANDLER(SMSG_TIME_SYNC_REQ, HandleTimeSyncRequest),
+
+        // QueryHandler.cpp
+        BIND_OPCODE_HANDLER(SMSG_NAME_QUERY_RESPONSE, HandleNameQueryResponse),
 
         // WardenHandler.cpp
         BIND_OPCODE_HANDLER(SMSG_WARDEN_DATA, HandleWardenData)
@@ -136,14 +144,34 @@ void WorldSession::Enter()
         });
 
         eventMgr_.AddEvent(pingEvent);
+
+        std::shared_ptr<Event> saveEvent(new Event(EVENT_PERIODIC_SAVE));
+        saveEvent->SetPeriod(MINUTE * IN_MILLISECONDS);
+        saveEvent->SetEnabled(true);
+        saveEvent->SetCallback([this]() {
+            playerNames_.Save();
+        });
+
+        eventMgr_.AddEvent(saveEvent);
     }
     eventMgr_.Start();
 }
 
 void WorldSession::HandleConsoleCommand(std::string cmd)
 {
+    std::vector<std::string> args;
+    std::stringstream ss(cmd);
+    std::string tmp;
+
+    while (std::getline(ss, tmp, ' '))
+        args.push_back(tmp);
+
+    cmd = args[0];
+
     if (cmd == "quit" || cmd == "disconnect" || cmd == "logout")
+    {
         socket_.Disconnect();
+    }
 }
 
 WorldSocket* WorldSession::GetSocket()

@@ -433,12 +433,12 @@ class ByteBuffer
             rpos_ += len;
         }
 
-        uint64_t readPackGUID()
+        void readPackGUID(uint64_t& guid)
         {
             if (rpos() + 1 > size())
                 throw ByteBufferPositionException(false, rpos_, 1, size());
 
-            uint64_t guid = 0;
+            guid = 0;
 
             uint8_t guidmark = 0;
             (*this) >> guidmark;
@@ -455,8 +455,6 @@ class ByteBuffer
                     guid |= (uint64_t(bit) << (i * 8));
                 }
             }
-
-            return guid;
         }
 
         uint32_t ReadPackedTime()
@@ -478,11 +476,6 @@ class ByteBuffer
         {
             time = ReadPackedTime();
             return *this;
-        }
-
-        uint64_t ReadObjectGuid()
-        {
-            return read<uint64_t>();
         }
 
         uint8_t * contents() { return &storage_[0]; }

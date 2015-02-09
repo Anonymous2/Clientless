@@ -50,7 +50,7 @@ void CharacterList::Populate(uint32_t count, WorldPacket &recvPacket)
 
     for (uint8_t i = 0; i < count; i++)
     {
-        recvPacket.read((uint8_t*)&list_[i].Class, 1);
+        list_[i].Class = recvPacket.read<Classes>();
 
         for (uint8_t j = 0; j < 19; j++)
         {
@@ -85,7 +85,7 @@ void CharacterList::Populate(uint32_t count, WorldPacket &recvPacket)
         recvPacket >> list_[i].CustomizationFlags;
         recvPacket >> list_[i].Display.FacialHair;
         recvPacket.ReadByteSeq(list_[i].Guid[7]);
-        recvPacket.read((uint8_t*)&list_[i].Gender, 1);
+        list_[i].Gender = recvPacket.read<Genders>();
         list_[i].Name = recvPacket.ReadString(list_[i].Name.size());
         recvPacket >> list_[i].Display.Face;
         recvPacket.ReadByteSeq(list_[i].Guid[0]);
@@ -94,7 +94,7 @@ void CharacterList::Populate(uint32_t count, WorldPacket &recvPacket)
         recvPacket.ReadByteSeq(list_[i].GuildGuid[7]);
         recvPacket >> list_[i].Position.X;
         recvPacket >> list_[i].Display.Skin;
-        recvPacket.read((uint8_t*)&list_[i].Race, 1);
+        list_[i].Race = recvPacket.read<Races>();
         recvPacket >> list_[i].Level;
         recvPacket.ReadByteSeq(list_[i].Guid[6]);
         recvPacket.ReadByteSeq(list_[i].GuildGuid[4]);
@@ -110,7 +110,7 @@ void CharacterList::Print() const
     std::cout << "[Characterlist]" << std::endl;
 
     for (Character const& character : list_)
-        std::cout << " - " << character.Name << "(" << character.GetRaceAsStr() << " " << character.GetClassAsStr() << " [Level " << character.Level << "]" << std::endl;
+        std::cout << " - " << character.Name << " (" << character.GetRaceAsStr() << " " << character.GetClassAsStr() << ") [Level " << uint32_t(character.Level) << "]" << std::endl;
 }
 
 Character const* CharacterList::GetCharacterByName(std::string name) const
