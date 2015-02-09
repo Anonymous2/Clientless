@@ -27,6 +27,7 @@
 #include "WorldSocket.h"
 #include "Warden.h"
 #include "Cache.h"
+#include "ChatMgr.h"
 #include <queue>
 
 struct WorldOpcodeHandler;
@@ -44,6 +45,7 @@ class WorldSession
         void HandleConsoleCommand(std::string cmd);
 
         WorldSocket* GetSocket();
+        const PlayerNameCache* GetPlayerNameCache();
     private:
         std::shared_ptr<Session> session_;
         uint32_t clientSeed_;
@@ -51,9 +53,10 @@ class WorldSession
 
         WorldSocket socket_;
         EventMgr eventMgr_;
+        ChatMgr chatMgr_;
         Player player_;
         Warden warden_;
-        Cache<PlayerNameEntry> playerNames_;
+        PlayerNameCache playerNames_;
 
         uint64_t lastPingTime_;
         uint32_t ping_;

@@ -43,8 +43,9 @@ class Cache
         bool Save();
 
         void Add(T& value);
-        bool Has(const T& value);
-        const T* Get(const T& value);
+        bool Has(const T& value) const;
+        bool Has(uint64_t GUID) const;
+        const T* Get(uint64_t GUID) const;
         void Remove(const T& value);
 
     private:
@@ -52,3 +53,5 @@ class Cache
         std::vector<uint64_t> newEntries_;
         std::string fileName_;
 };
+
+typedef Cache<PlayerNameEntry> PlayerNameCache;

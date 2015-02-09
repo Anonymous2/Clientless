@@ -30,7 +30,7 @@ struct WorldOpcodeHandler
 };
 
 WorldSession::WorldSession(std::shared_ptr<Session> session)
-    : session_(session), socket_(this), serverSeed_(0), warden_(this),
+    : session_(session), socket_(this), serverSeed_(0), chatMgr_(this), warden_(this),
     playerNames_("cache_players.dat"), lastPingTime_(0), ping_(0)
 {
     clientSeed_ = static_cast<uint32_t>(time(nullptr));
@@ -148,6 +148,15 @@ void WorldSession::Enter()
         });
 
         eventMgr_.AddEvent(pingEvent);
+
+        std::shared_ptr<Event> chatProcessEvent(new Event(EVENT_PROCESS_CHAT_MESSAGES));
+        chatProcessEvent->SetPeriod(100);
+        chatProcessEvent->SetEnabled(false);
+        chatProcessEvent->SetCallback([this]() {
+            chatMgr_.ProcessMessages();
+        });
+
+        eventMgr_.AddEvent(chatProcessEvent);
     }
     eventMgr_.Start();
 }
@@ -172,4 +181,9 @@ void WorldSession::HandleConsoleCommand(std::string cmd)
 WorldSocket* WorldSession::GetSocket()
 {
     return &socket_;
+}
+
+const PlayerNameCache* WorldSession::GetPlayerNameCache()
+{
+    return &playerNames_;
 }

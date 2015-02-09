@@ -76,6 +76,9 @@ void WorldSession::HandleCharacterEnum(WorldPacket &recvPacket)
 
         if (std::shared_ptr<Event> keepAliveEvent = eventMgr_.GetEvent(EVENT_SEND_KEEP_ALIVE))
             keepAliveEvent->SetEnabled(true);
+
+        if (std::shared_ptr<Event> chatProcessEvent = eventMgr_.GetEvent(EVENT_PROCESS_CHAT_MESSAGES))
+            chatProcessEvent->SetEnabled(true);
     }
     else
     {

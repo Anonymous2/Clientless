@@ -19,10 +19,7 @@
 
 void WorldSession::SendNameQuery(ObjectGuid guid)
 {
-    PlayerNameEntry entry;
-    entry.GUID = guid.GetRawValue();
-
-    if (playerNames_.Has(entry))
+    if (playerNames_.Has(guid))
         return;
 
     WorldPacket packet(CMSG_NAME_QUERY);

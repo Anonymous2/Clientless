@@ -27,7 +27,8 @@ enum EventId
 {
     EVENT_PROCESS_INCOMING      = 0,
     EVENT_SEND_KEEP_ALIVE       = 1,
-    EVENT_SEND_PING             = 2
+    EVENT_SEND_PING             = 2,
+    EVENT_PROCESS_CHAT_MESSAGES = 3
 };
 
 typedef std::function<void()> EventCallback;

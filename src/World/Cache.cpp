@@ -81,7 +81,7 @@ void Cache<T>::Add(T& value)
 }
 
 template <typename T>
-bool Cache<T>::Has(const T& value)
+bool Cache<T>::Has(const T& value) const
 {
     int count = std::count_if(entries_.begin(), entries_.end(), [value](const T& entry) {
         return entry.GUID == value.GUID;
@@ -91,10 +91,20 @@ bool Cache<T>::Has(const T& value)
 }
 
 template <typename T>
-const T* Cache<T>::Get(const T& value)
+bool Cache<T>::Has(uint64_t GUID) const
 {
-    auto itr = std::find_if(entries_.begin(), entries_.end(), [value](const T& entry) {
-        return entry.GUID == value.GUID;
+    int count = std::count_if(entries_.begin(), entries_.end(), [GUID](const T& entry) {
+        return entry.GUID == GUID;
+    });
+
+    return count > 0;
+}
+
+template <typename T>
+const T* Cache<T>::Get(uint64_t GUID) const
+{
+    auto itr = std::find_if(entries_.begin(), entries_.end(), [GUID](const T& entry) {
+        return entry.GUID == GUID;
     });
 
     if (itr == entries_.end())
