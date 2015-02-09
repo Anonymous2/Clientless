@@ -71,6 +71,11 @@ class WorldSession
         void HandleAuthenticationChallenge(WorldPacket &recvPacket);
         void HandleAuthenticationResponse(WorldPacket &recvPacket);
 
+    // ChannelHandler.cpp
+    private:
+        void JoinChannel(const std::string name, const std::string password = "");
+        void HandleChannelNotification(WorldPacket &recvPacket);
+
     // CharacterHandler.cpp
     private:
         void HandleCharacterEnum(WorldPacket &recvPacket);

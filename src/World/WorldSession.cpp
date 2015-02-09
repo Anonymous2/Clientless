@@ -52,6 +52,9 @@ const std::vector<WorldOpcodeHandler> WorldSession::GetOpcodeHandlers()
         BIND_OPCODE_HANDLER(SMSG_AUTH_CHALLENGE, HandleAuthenticationChallenge),
         BIND_OPCODE_HANDLER(SMSG_AUTH_RESPONSE, HandleAuthenticationResponse),
 
+        // ChannelHandler.cpp
+        BIND_OPCODE_HANDLER(SMSG_CHANNEL_NOTIFY, HandleChannelNotification),
+
         // CharacterHandler.cpp
         BIND_OPCODE_HANDLER(SMSG_CHAR_ENUM, HandleCharacterEnum),
 

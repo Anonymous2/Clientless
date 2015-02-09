@@ -94,10 +94,14 @@ enum ChatType : uint8_t
 
 enum ChatTag : uint8_t
 {
-    CHAT_TAG_NONE   = 0,
-    CHAT_TAG_AFK    = 1,
-    CHAT_TAG_DND    = 3,
-    CHAT_TAG_GM     = 4
+    CHAT_TAG_NONE   = 0x00,
+    CHAT_TAG_AFK    = 0x01,
+    CHAT_TAG_DND    = 0x02,
+    CHAT_TAG_GM     = 0x04,
+    CHAT_TAG_UNK1   = 0x08,
+    CHAT_TAG_DEV    = 0x10,
+    CHAT_TAG_UNK2   = 0x40,
+    CHAT_TAG_COM    = 0x80
 };
 
 struct ChatMessage

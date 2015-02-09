@@ -85,6 +85,9 @@ void ChatMgr::ProcessMessages()
         case CHAT_TAG_GM:
             message->SenderName = "<GM>" + message->SenderName;
             break;
+        case CHAT_TAG_DEV:
+            message->SenderName = "<Dev>" + message->SenderName;
+            break;
     }
 
     message->SenderName = "[" + message->SenderName + "]";
