@@ -111,21 +111,8 @@ void WorldSession::Enter()
         packetProcessEvent->SetPeriod(10);
         packetProcessEvent->SetEnabled(true);
         packetProcessEvent->SetCallback([this]() {
-            while (std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket())
-            {
-                switch (packet->GetOpcode())
-                {
-                    case MSG_VERIFY_CONNECTIVITY:
-                    case SMSG_AUTH_CHALLENGE:
-                    case SMSG_AUTH_RESPONSE:
-                    case SMSG_WARDEN_DATA:
-                        HandlePacket(packet);
-                        break;
-                    default:
-                        std::async(&WorldSession::HandlePacket, this, packet);
-                        break;
-                }
-            }
+            if (std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket())
+                HandlePacket(packet);
         });
 
         eventMgr_.AddEvent(packetProcessEvent);
