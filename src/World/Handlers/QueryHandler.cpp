@@ -52,7 +52,6 @@ void WorldSession::HandleNameQueryResponse(WorldPacket &recvPacket)
     std::string realmName;
     recvPacket >> realmName;
 
-    assert(name.length() <= 12);
     memcpy(&entry.Name, name.c_str(), name.size() + 1);
 
     entry.PlayerRace = recvPacket.read<Races>();

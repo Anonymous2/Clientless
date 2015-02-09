@@ -72,6 +72,10 @@ class WorldSession
     private:
         void HandleCharacterEnum(WorldPacket &recvPacket);
 
+    // ChatHandler.cpp
+    private:
+        void HandleMessageChat(WorldPacket &recvPacket);
+
     // MiscHandler.cpp
     private:
         void HandleMOTD(WorldPacket &recvPacket);

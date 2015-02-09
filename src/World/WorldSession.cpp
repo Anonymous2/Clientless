@@ -55,6 +55,10 @@ const std::vector<WorldOpcodeHandler> WorldSession::GetOpcodeHandlers()
         // CharacterHandler.cpp
         BIND_OPCODE_HANDLER(SMSG_CHAR_ENUM, HandleCharacterEnum),
 
+        // ChatHandler.cpp
+        BIND_OPCODE_HANDLER(SMSG_MESSAGECHAT, HandleMessageChat),
+        BIND_OPCODE_HANDLER(SMSG_GM_MESSAGECHAT, HandleMessageChat),
+
         // MiscHandler.cpp
         BIND_OPCODE_HANDLER(SMSG_MOTD, HandleMOTD),
         BIND_OPCODE_HANDLER(SMSG_PONG, HandlePong),
@@ -144,15 +148,6 @@ void WorldSession::Enter()
         });
 
         eventMgr_.AddEvent(pingEvent);
-
-        std::shared_ptr<Event> saveEvent(new Event(EVENT_PERIODIC_SAVE));
-        saveEvent->SetPeriod(MINUTE * IN_MILLISECONDS);
-        saveEvent->SetEnabled(true);
-        saveEvent->SetCallback([this]() {
-            playerNames_.Save();
-        });
-
-        eventMgr_.AddEvent(saveEvent);
     }
     eventMgr_.Start();
 }

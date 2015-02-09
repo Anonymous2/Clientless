@@ -49,13 +49,22 @@ bool Cache<T>::Load()
 template <typename T>
 bool Cache<T>::Save()
 {
-    std::ofstream output(fileName_);
+    std::ofstream output(fileName_, std::ios_base::app);
 
     if (!output)
         return false;
 
     for (const T& entry : entries_)
+    {
+        auto itr = std::find(newEntries_.begin(), newEntries_.end(), entry.GUID);
+
+        if (itr == newEntries_.end())
+            continue;
+
         output.write(reinterpret_cast<const char*>(&entry), sizeof(T));
+    }
+
+    newEntries_.clear();
 
     if (!output)
         return false;
@@ -66,7 +75,9 @@ bool Cache<T>::Save()
 template <typename T>
 void Cache<T>::Add(T& value)
 {
+
     entries_.push_back(value);
+    newEntries_.push_back(value.GUID);
 }
 
 template <typename T>

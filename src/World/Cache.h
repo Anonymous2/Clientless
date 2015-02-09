@@ -25,7 +25,7 @@
 struct PlayerNameEntry
 {
     uint64_t GUID;
-    char Name[13];
+    char Name[64];
     Races PlayerRace;
     Genders PlayerGender;
     Classes PlayerClass;
@@ -49,5 +49,6 @@ class Cache
 
     private:
         std::vector<T> entries_;
+        std::vector<uint64_t> newEntries_;
         std::string fileName_;
 };

@@ -64,4 +64,6 @@ void WorldSession::HandleTimeSyncRequest(WorldPacket &recvPacket)
     packet << timeSyncCounter;
     packet << uint32_t(ms.count());
     SendPacket(packet);
+
+    playerNames_.Save();
 }
