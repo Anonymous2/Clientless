@@ -140,5 +140,8 @@ void WorldSession::HandleMessageChat(WorldPacket &recvPacket)
             SendNameQuery(message.ReceiverGUID);
     }
 
+    if (message.Language == LANG_ADDON)
+        return;
+
     chatMgr_.EnqueueMessage(message);
 }

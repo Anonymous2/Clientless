@@ -111,7 +111,7 @@ void WorldSession::Enter()
         packetProcessEvent->SetPeriod(10);
         packetProcessEvent->SetEnabled(true);
         packetProcessEvent->SetCallback([this]() {
-            if (std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket())
+            while (std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket())
                 HandlePacket(packet);
         });
 
