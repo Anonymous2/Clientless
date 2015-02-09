@@ -72,7 +72,7 @@ enum Team : uint16_t
     ALLIANCE            = 469
 };
 
-enum Language : uint32_t
+enum Languages : uint32_t
 {
     LANG_UNIVERSAL      = 0,
     LANG_ORCISH         = 1,

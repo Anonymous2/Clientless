@@ -21,15 +21,8 @@ void WorldSession::HandleMessageChat(WorldPacket &recvPacket)
 {
     ChatMessage message;
     message.Type = recvPacket.read<ChatType>();
-    message.Language = recvPacket.read<Language>();
+    message.Language = recvPacket.read<Languages>();
     recvPacket >> message.SenderGUID;
-
-    if (message.SenderGUID.IsPlayer())
-    {
-        if (!playerNames_.Has(message.SenderGUID))
-            SendNameQuery(message.SenderGUID);
-    }
-
     recvPacket >> message.Flags;
 
     switch (message.Type)
@@ -133,6 +126,18 @@ void WorldSession::HandleMessageChat(WorldPacket &recvPacket)
 
         recvPacket >> displayTime;
         recvPacket >> hideInChatFrame;
+    }
+
+    if (message.SenderGUID.IsPlayer())
+    {
+        if (!playerNames_.Has(message.SenderGUID))
+            SendNameQuery(message.SenderGUID);
+    }
+
+    if (message.ReceiverGUID.IsPlayer())
+    {
+        if (!playerNames_.Has(message.ReceiverGUID))
+            SendNameQuery(message.ReceiverGUID);
     }
 
     chatMgr_.EnqueueMessage(message);

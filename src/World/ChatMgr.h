@@ -103,7 +103,7 @@ enum ChatTag : uint8_t
 struct ChatMessage
 {
     ChatType Type;
-    Language Language;
+    Languages Language;
     uint32_t Flags;
     ObjectGuid SenderGUID;
     std::string SenderName;
