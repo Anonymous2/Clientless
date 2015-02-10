@@ -149,8 +149,6 @@ void WorldSocket::RunReceiverThread()
         size = (header[0] << 8) | header[1];
         opcode = static_cast<Opcodes>(header[2] | (header[3] << 8));
 
-        print("Received 0x%04X", opcode);
-
         size -= sizeof(Opcodes);
 
         // Read body
