@@ -96,7 +96,7 @@ void WorldSession::Enter()
         packetProcessEvent->SetEnabled(true);
         packetProcessEvent->SetCallback([this]() {
             while (std::shared_ptr<WorldPacket> packet = socket_.GetNextPacket())
-                std::async(&WorldSession::HandlePacket, this, packet);
+                HandlePacket(packet);
         });
 
         eventMgr_.AddEvent(packetProcessEvent);
