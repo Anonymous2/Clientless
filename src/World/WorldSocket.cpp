@@ -51,8 +51,6 @@ bool WorldSocket::Connect(std::string address)
     if (!TCPSocket::Connect(address))
         return false;
 
-    packetCrypt_.Reset();
-
     senderThread_ = std::thread(&WorldSocket::RunSenderThread, this);
     receiverThread_ = std::thread(&WorldSocket::RunReceiverThread, this);
     return true;
@@ -120,8 +118,7 @@ void WorldSocket::RunSenderThread()
 
             if (packet->GetOpcode() == CMSG_AUTH_SESSION)
             {
-                packetCrypt_.SetKey(session_->session_->GetKey().AsByteArray().get(), session_->session_->GetKey().GetNumBytes());
-                packetCrypt_.Init();
+                packetCrypt_.Init(&session_->session_->GetKey());
             }   
         }
         else

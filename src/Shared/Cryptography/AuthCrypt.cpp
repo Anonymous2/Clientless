@@ -1,9 +1,8 @@
 /**
- * MaNGOS is a full featured server for World of Warcraft, supporting
- * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ * mangos-one is a full featured server for World of Warcraft in its first
+ * expansion version, supporting clients for patch 2.4.3.
  *
- * Copyright (C) 2015 Dehravor <dehravor@gmail.com>
- * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2013  MaNGOS project <http://getmangos.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,25 +24,17 @@
 
 #include "AuthCrypt.h"
 #include "HMACSHA1.h"
-#include <cstring>
+#include "BigNumber.h"
+
+const static size_t CRYPTED_SEND_LEN = 6;
+const static size_t CRYPTED_RECV_LEN = 4;
 
 AuthCrypt::AuthCrypt()
 {
     _initialized = false;
 }
 
-void AuthCrypt::Init()
-{
-    _send_i = _send_j = _recv_i = _recv_j = 0;
-    _initialized = true;
-}
-
-void AuthCrypt::Reset()
-{
-    _initialized = false;
-}
-
-void AuthCrypt::DecryptRecv(uint8* data, size_t len)
+void AuthCrypt::DecryptRecv(uint8_t* data, size_t len)
 {
     if (!_initialized) { return; }
     if (len < CRYPTED_RECV_LEN) { return; }
@@ -51,14 +42,14 @@ void AuthCrypt::DecryptRecv(uint8* data, size_t len)
     for (size_t t = 0; t < CRYPTED_RECV_LEN; t++)
     {
         _recv_i %= _key.size();
-        uint8 x = (data[t] - _recv_j) ^ _key[_recv_i];
+        uint8_t x = (data[t] - _recv_j) ^ _key[_recv_i];
         ++_recv_i;
         _recv_j = data[t];
         data[t] = x;
     }
 }
 
-void AuthCrypt::EncryptSend(uint8* data, size_t len)
+void AuthCrypt::EncryptSend(uint8_t* data, size_t len)
 {
     if (!_initialized) { return; }
     if (len < CRYPTED_SEND_LEN) { return; }
@@ -66,30 +57,28 @@ void AuthCrypt::EncryptSend(uint8* data, size_t len)
     for (size_t t = 0; t < CRYPTED_SEND_LEN; t++)
     {
         _send_i %= _key.size();
-        uint8 x = (data[t] ^ _key[_send_i]) + _send_j;
+        uint8_t x = (data[t] ^ _key[_send_i]) + _send_j;
         ++_send_i;
         data[t] = _send_j = x;
     }
 }
 
-void AuthCrypt::SetKey(uint8* key, size_t len)
+void AuthCrypt::Init(const BigNumber* K)
 {
-    _key.resize(len);
-    std::copy(key, key + len, _key.begin());
-}
+    uint8_t* key = new uint8_t[20];
+    uint8_t recvSeed[16] = { 0x38, 0xA7, 0x83, 0x15, 0xF8, 0x92, 0x25, 0x30, 0x71, 0x98, 0x67, 0xB1, 0x8C, 0x4, 0xE2, 0xAA };
+    HMACSHA1 recvHash((uint8_t*)recvSeed, 16);
+    recvHash.Update(*K);
+    recvHash.Finalize();
+    memcpy(key, recvHash.GetDigest(), 20);
+    _key.resize(20);
+    std::copy(key, key + 20, _key.begin());
+    delete[] key;
 
+    _send_i = _send_j = _recv_i = _recv_j = 0;
+    _initialized = true;
+}
 
 AuthCrypt::~AuthCrypt()
 {
-}
-
-void AuthCrypt::GenerateKey(uint8* key, BigNumber* bn)
-{
-    uint8 temp[16] = { 0x38, 0xA7, 0x83, 0x15, 0xF8, 0x92, 0x25, 0x30, 0x71, 0x98, 0x67, 0xB1, 0x8C, 0x4, 0xE2, 0xAA };
-
-    HMACSHA1 hash(temp, 16);
-    hash.Update(*bn);
-    hash.Finalize();
-
-    memcpy(key, hash.GetDigest(), hash.GetDigestLength());
 }

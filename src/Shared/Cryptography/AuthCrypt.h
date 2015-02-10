@@ -1,9 +1,8 @@
 /**
- * MaNGOS is a full featured server for World of Warcraft, supporting
- * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ * mangos-one is a full featured server for World of Warcraft in its first
+ * expansion version, supporting clients for patch 2.4.3.
  *
- * Copyright (C) 2015 Dehravor <dehravor@gmail.com>
- * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2013  MaNGOS project <http://getmangos.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +22,11 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef MANGOS_H_AUTHCRYPT
-#define MANGOS_H_AUTHCRYPT
+#ifndef _AUTHCRYPT_H
+#define _AUTHCRYPT_H
 
-#include "Define.h"
+#include "Common.h"
 #include <vector>
-#include <cstdlib>
 
 class BigNumber;
 
@@ -50,43 +48,26 @@ class AuthCrypt
          */
         ~AuthCrypt();
 
-        const static size_t CRYPTED_SEND_LEN = 6; /**< TODO */
-        const static size_t CRYPTED_RECV_LEN = 4; /**< TODO */
 
         /**
          * @brief
          *
          */
-        void Init();
-
-        /**
-        * @brief
-        *
-        */
-        void Reset();
-
-        /**
-         * @brief
-         *
-         * @param key
-         * @param len
-         */
-        void SetKey(uint8* key, size_t len);
-
+        void Init(const BigNumber* K);
         /**
          * @brief
          *
          * @param
          * @param size_t
          */
-        void EncryptSend(uint8*, size_t);
+        void DecryptRecv(uint8_t*, size_t);
         /**
          * @brief
          *
          * @param
          * @param size_t
          */
-        void DecryptRecv(uint8*, size_t);
+        void EncryptSend(uint8_t*, size_t);
 
         /**
          * @brief
@@ -95,17 +76,9 @@ class AuthCrypt
          */
         bool IsInitialized() { return _initialized; }
 
-        /**
-         * @brief
-         *
-         * @param
-         * @param
-         */
-        static void GenerateKey(uint8*, BigNumber*);
-
     private:
-        std::vector<uint8> _key; /**< TODO */
-        uint8 _send_i, _send_j, _recv_i, _recv_j; /**< TODO */
+        std::vector<uint8_t> _key; /**< TODO */
+        uint8_t _send_i, _send_j, _recv_i, _recv_j; /**< TODO */
         bool _initialized; /**< TODO */
 };
 #endif
