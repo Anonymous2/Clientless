@@ -50,14 +50,16 @@ void CharacterList::Populate(uint32 count, WorldPacket &recvPacket)
         recvPacket >> character.Pet.Level;
         recvPacket >> character.Pet.Family;
 
-        for (int j = 0; j < 19; j++)
+        for (uint8 j = 0; j < 19; j++)
         {
             recvPacket >> character.Items[j].DisplayId;
             recvPacket >> character.Items[j].InventoryType;
+            recvPacket >> character.Items[j].EnchantAuraId;
         }
 
         recvPacket.read_skip<uint32>();
         recvPacket.read_skip<uint8>();
+        recvPacket.read_skip<uint32_t>();
 
         list_[i] = character;
     }

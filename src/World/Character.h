@@ -43,6 +43,7 @@ struct CharacterItems
 {
     uint32 DisplayId;
     uint8 InventoryType;
+    uint32 EnchantAuraId;
 };
 
 struct CharacterBags
