@@ -27,6 +27,7 @@
 
 #include "Common.h"
 #include <vector>
+#include <cstring>
 
 class BigNumber;
 
