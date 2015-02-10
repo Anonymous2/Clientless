@@ -3,7 +3,7 @@ Clientless
 
 Clientless is a World of Warcraft client emulator based on TrinityCore.
 
-**Warning:** The 1.12.1 branch is a spin-off, which is no longer maintained. It has never been tested nor actively developed. This is a backport, which is good enough to get online with your character(s) on servers running the original version of the game.
+**Warning:** The 2.4.3 branch is a spin-off, which is no longer maintained. It has never been tested nor actively developed. This is a backport, which is good enough to get online with your character(s) on servers running the original version of the game.
 
 [![Build Status](https://drone.io/github.com/Dehravor/Clientless/status.png)](https://drone.io/github.com/Dehravor/Clientless/latest)
 
