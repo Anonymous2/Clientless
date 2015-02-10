@@ -36,7 +36,7 @@ enum RealmFlags : uint8
  
 struct Realm
 {
-    uint32 Icon;
+    uint8 Icon;
     bool Lock;
     RealmFlags Flags;
     std::string Name;
