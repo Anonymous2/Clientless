@@ -23,7 +23,7 @@ Custom packet handlers can be added easily.
 + First, you need to declare your function's prototype in *WorldSession.h*
 
 ```
-    HandleCharacterEnum(WorldPacket &recvPacket));
+    void HandleCharacterEnum(WorldPacket &recvPacket);
 ```
 
 + Then you have to associate the desired opcode with your handler function in *WorldSession.cpp*
